@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Residual Attention Network
+base models of Residual Attention Network
 """
 
 import tensorflow as tf
@@ -46,16 +46,19 @@ class Dense(Layer):
 
 class Conv(Layer):
     """Convolution layer"""
-    def __init__(self, shape, strides=[1, 2, 2, 1]):
+    def __init__(self, shape, strides=[1, 2, 2, 1], padding="SAME"):
         """
         :param shape: shape of filter weight (ex:[row of filter, line of filter , input channel, output channel]
+        :param strides: strides of kernel
+        :param padding: padding type ["SAME", "VALID"]
         """
         super().__init__(self, shape)
         self.strides = strides
+        self.padding = padding
 
     def f_prop(self, x):
         """forward propagation"""
-        conv = tf.nn.conv2d(x, filter=self.W, strides=self.strides, padding="SAME")
+        conv = tf.nn.conv2d(x, filter=self.W, strides=self.strides, padding=self.padding)
         return conv
 
 class BatchNormalization(object):
@@ -92,7 +95,7 @@ class BatchNormalization(object):
 
 class ResidualBlock(object):
     """residual block proposed by https://arxiv.org/pdf/1603.05027.pdf"""
-    def __init__(self, output_channels, projection=False):
+    def __init__(self, output_channels=None, projection=False):
         """
         :param output_channels: dimension of output_channel. input_channel -> output_channel
         """
@@ -102,11 +105,15 @@ class ResidualBlock(object):
     def f_prop(self, x):
         """
         forward propagation
-        :param x:input x
+        :param x: input x
         :return: output residual block
         """
-        # batch normalization & ReLU
+        # set channels
         input_channels = x.get_shape().as_list()[3]
+        if self.output_channels is None:
+            self.output_channels = input_channels
+
+        # batch normalization & ReLU
         batch_normalization = BatchNormalization(input_channels)
         batch_normed_output = batch_normalization.f_prop(x)
 
