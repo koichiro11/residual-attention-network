@@ -61,6 +61,7 @@ class Conv(Layer):
         conv = tf.nn.conv2d(x, filter=self.W, strides=self.strides, padding=self.padding)
         return conv
 
+
 class BatchNormalization(object):
     """
     batch normalization
@@ -95,12 +96,22 @@ class BatchNormalization(object):
 
 class ResidualBlock(object):
     """residual block proposed by https://arxiv.org/pdf/1603.05027.pdf"""
-    def __init__(self, output_channels=None, projection=False):
+    def __init__(self, input_channels, output_channels=None, projection=False):
         """
-        :param output_channels: dimension of output_channel. input_channel -> output_channel
+        :param input_channels: dimension of input channel.
+        :param output_channels: dimension of output channel. input_channel -> output_channel
         """
+        self.input_channels = input_channels
         self.output_channels = output_channels
         self.projection = projection
+
+        # graph
+        self.batch_normalization = BatchNormalization(self.input_channels)
+        self.conv1 = Conv([3, 3, self.input_channels, self.output_channels], strides=[1, 1, 1, 1])
+        self.batch_normalization_2 = BatchNormalization(self.output_channels)
+        self.conv2 = Conv([3, 3, self.output_channels, self.output_channels], strides=[1, 1, 1, 1])
+
+        self._conv = Conv([1, 1, self.input_channels, self.output_channels], strides=[1, 1, 1, 1])
 
     def f_prop(self, x):
         """
@@ -109,35 +120,28 @@ class ResidualBlock(object):
         :return: output residual block
         """
         # set channels
-        input_channels = x.get_shape().as_list()[3]
         if self.output_channels is None:
-            self.output_channels = input_channels
+            self.output_channels = self.input_channels
 
         # batch normalization & ReLU
-        batch_normalization = BatchNormalization(input_channels)
-        batch_normed_output = batch_normalization.f_prop(x)
+        batch_normed_output = self.batch_normalization.f_prop(x)
 
         # convolution1: change channels
-        conv1 = Conv([3, 3, input_channels, self.output_channels], strides=[1, 1, 1, 1])
-        output_conv1 = conv1.f_prop(batch_normed_output)
+        output_conv1 = self.conv1.f_prop(batch_normed_output)
 
         # batch normalization & ReLU
-        input_channels = output_conv1.get_shape().as_list()[3]
-        batch_normalization_2 = BatchNormalization(input_channels)
-        batch_normed_output = batch_normalization_2.f_prop(output_conv1)
+        batch_normed_output = self.batch_normalization_2.f_prop(output_conv1)
 
         # convolution2
-        conv2= Conv([3, 3, self.output_channels, self.output_channels], strides=[1, 1, 1, 1])
-        output_conv2 = conv2.f_prop(batch_normed_output)
+        output_conv2 = self.conv2.f_prop(batch_normed_output)
 
-        if input_channels != self.output_channels:
+        if self.input_channels != self.output_channels:
             if self.projection:
                 # Option B: Projection shortcut
-                _conv = Conv([1, 1, input_channels, self.output_channels], strides=[1, 1, 1, 1])
-                input_layer = _conv.f_prop(x)
+                input_layer = self.conv.f_prop(x)
             else:
                 # Option A: Zero-padding
-                input_layer = tf.pad(x, [[0, 0], [0, 0], [0, 0], [0, self.output_channels - input_channels]])
+                input_layer = tf.pad(x, [[0, 0], [0, 0], [0, 0], [0, self.output_channels - self.input_channels]])
         else:
             input_layer = x
 
