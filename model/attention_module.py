@@ -102,8 +102,6 @@ class AttentionModule(object):
         # interpolation TODO(check this method is valid)
         output_soft_mask = UpSampling2D([2, 2])(output_soft_mask)
 
-        _channels = output_soft_mask.get_shape().as_list()[3]
-
         # 1*1 conv
         output_soft_mask = self.conv1.f_prop(output_soft_mask)
         output_soft_mask = self.conv2.f_prop(output_soft_mask)

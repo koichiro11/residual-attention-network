@@ -32,7 +32,7 @@ W = np.array(np.random.randn(7,7)).astype('float32').reshape(7, 7, 1, 1)
 W1 = np.array([[1, 0],
               [0, 1]]).astype('float32').reshape(2, 2, 1, 1)
 
-convoluted_image = tf.nn.conv2d(x, W, strides=[1,2,2,1], padding='SAME')
+convoluted_image = tf.nn.conv2d(x, W, strides=[1, 2, 2, 1], padding='SAME')
 
 pooling_image = tf.nn.avg_pool(x, ksize=[1, 7, 7, 1], strides=[1, 1, 1, 1], padding='VALID')
 
