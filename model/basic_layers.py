@@ -96,22 +96,21 @@ class BatchNormalization(object):
 
 class ResidualBlock(object):
     """residual block proposed by https://arxiv.org/pdf/1603.05027.pdf"""
-    def __init__(self, input_channels, output_channels=None, projection=False):
+    def __init__(self, input_channels, stride=1, output_channels=None):
         """
         :param input_channels: dimension of input channel.
         :param output_channels: dimension of output channel. input_channel -> output_channel
         """
         self.input_channels = input_channels
         self.output_channels = output_channels
-        self.projection = projection
-
+        self.stride = stride
         # graph
         self.batch_normalization = BatchNormalization(self.input_channels)
         self.conv1 = Conv([3, 3, self.input_channels, self.output_channels], strides=[1, 1, 1, 1])
         self.batch_normalization_2 = BatchNormalization(self.output_channels)
-        self.conv2 = Conv([3, 3, self.output_channels, self.output_channels], strides=[1, 1, 1, 1])
+        self.conv2 = Conv([3, 3, self.output_channels, self.output_channels], strides=[1, stride, stride, 1])
 
-        self._conv = Conv([1, 1, self.input_channels, self.output_channels], strides=[1, 1, 1, 1])
+        self._conv = Conv([1, 1, self.input_channels, self.output_channels], strides=[1, stride, stride, 1])
 
     def f_prop(self, x):
         """
@@ -135,13 +134,8 @@ class ResidualBlock(object):
         # convolution2
         output_conv2 = self.conv2.f_prop(batch_normed_output)
 
-        if self.input_channels != self.output_channels:
-            if self.projection:
-                # Option B: Projection shortcut
-                input_layer = self.conv.f_prop(x)
-            else:
-                # Option A: Zero-padding
-                input_layer = tf.pad(x, [[0, 0], [0, 0], [0, 0], [0, self.output_channels - self.input_channels]])
+        if (self.input_channels != self.output_channels) or (self.stride!=1):
+            input_layer = self._conv.f_prop(x)
         else:
             input_layer = x
 
