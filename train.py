@@ -22,6 +22,7 @@ rng = np.random.RandomState(1234)
 random_state = 42
 NUM_EPOCHS = 100
 BATCH_SIZE = 64
+VALID_BATCH_SIZE = 100
 DATASET_PATH = "residual-attention-network/dataset/"
 SAVE_PATH = "residual-attention-network/trained_models/model.ckpt"
 
@@ -132,7 +133,7 @@ if __name__ == "__main__":
             # valid
             valid_costs = []
             valid_predictions = []
-            n_batches = valid_X.shape[0] // BATCH_SIZE
+            n_batches = valid_X.shape[0] // VALID_BATCH_SIZE
             for i in range(n_batches):
                 start = i * BATCH_SIZE
                 end = start + BATCH_SIZE
