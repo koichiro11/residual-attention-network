@@ -74,17 +74,17 @@ class ResidualAttentionModel(object):
             # attention module, x -> [None, row/2, line/2, 128]
             self.attention_module1 = AttentionModule(64)
             # residual block, x -> [None, row/2, line/2, 256]
-            # self.residual_block2 = ResidualBlock(128, output_channels=256, stride=1)
+            self.residual_block2 = ResidualBlock(64, output_channels=128, stride=2)
             # attention module, x -> [None, row/8, line/8, 256]
-            # self.attention_module2 = AttentionModule(256)
+            self.attention_module2 = AttentionModule(128)
             # residual block, x -> [None, row/4, line/4, 512]
             # self.residual_block3 = ResidualBlock(64, output_channels=128, stride=2)
             # attention module, x -> [None, row/4, line/4, 512]
             # self.attention_module3 = AttentionModule(128)
             # residual block, x -> [None, row/8, line/8, 1024]
-            self.residual_block4 = ResidualBlock(64, output_channels=128, stride=2)
+            self.residual_block4 = ResidualBlock(128, output_channels=256, stride=2)
             # FC, softmax, [None, 1024]
-            self.average_pooling_kernel = [1, 8, 8, 1]
+            self.average_pooling_kernel = [1, 4, 4, 1]
             self.dense = Dense([128, self.output_dim])
         else:
             raise ValueError("this class is not for {target} dataset. Please write build_model method by yourself.".format(target=self.target))

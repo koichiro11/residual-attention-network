@@ -132,6 +132,7 @@ if __name__ == "__main__":
             # valid
             valid_costs = []
             valid_predictions = []
+            n_batches = valid_X.shape[0] // BATCH_SIZE
             for i in range(n_batches):
                 start = i * BATCH_SIZE
                 end = start + BATCH_SIZE
