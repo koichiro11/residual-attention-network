@@ -5,8 +5,8 @@ Residual Attention Network
 
 import tensorflow as tf
 
-from basic_layers import Dense, Conv, ResidualBlock
-from attention_module import AttentionModule
+from .basic_layers import Dense, Conv, ResidualBlock
+from .attention_module import AttentionModule
 
 
 class ResidualAttentionModel(object):
