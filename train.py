@@ -145,7 +145,7 @@ if __name__ == "__main__":
             accuracy = accuracy_score(np.argmax(valid_y, 1).astype('int32'), valid_predictions)
             if epoch % 5 == 0:
                 print('EPOCH: {epoch}, Training cost: {train_cost}, Validation cost: {valid_cost}, Validation F1: {f1_score}, Validation Accuracy: {accuracy} '
-                      .format(epoch=epoch, train_cost=np.mean(train_costs), valid_cost=np.mean(valid_costs), f1_score=f1_score, accuracy=))
+                      .format(epoch=epoch, train_cost=np.mean(train_costs), valid_cost=np.mean(valid_costs), f1_score=f1_score, accuracy=accuracy))
 
             if early_stopping.check(np.mean(valid_costs)):
                 break
