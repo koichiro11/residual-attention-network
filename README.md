@@ -22,9 +22,9 @@ accepted to CVPR2017
 
 - arxiv
 
-'''
+```
 https://arxiv.org/abs/1704.06904
-'''
+```
 
 - abstract
 
