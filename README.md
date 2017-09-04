@@ -53,7 +53,7 @@ in order to understand [Residual Attention Network for Image Classification](htt
 ### explanation
 
 I made document which explains [Residual Attention Network for Image Classification](https://arxiv.org/abs/1704.06904)(in Japanese).
-The document would be on the SlideShare and website of [Deep Learning JP](http://deeplearning.jp/en/)
+The document would be on SlideShare and the website of [Deep Learning JP](http://deeplearning.jp/en/)
 
 
 ### how to use
