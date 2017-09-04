@@ -20,7 +20,7 @@ from model.residual_attention_model import ResidualAttentionModel
 # HYPER-PARAMETER
 rng = np.random.RandomState(1234)
 random_state = 42
-NUM_EPOCHS = 100
+NUM_EPOCHS = 10000
 BATCH_SIZE = 64
 VALID_BATCH_SIZE = 100
 DATASET_PATH = "residual-attention-network/dataset/"
