@@ -10,7 +10,7 @@ import pickle
 
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
-from sklearn.metrics import f1_score
+from sklearn.metrics import f1_score, accuracy_score
 import tensorflow as tf
 from keras.datasets import cifar10
 
@@ -141,9 +141,11 @@ if __name__ == "__main__":
                 valid_predictions.extend(pred)
                 valid_costs.append(valid_cost)
 
-            score = f1_score(np.argmax(valid_y, 1).astype('int32'), valid_predictions, average='macro')
+            f1_score = f1_score(np.argmax(valid_y, 1).astype('int32'), valid_predictions, average='macro')
+            accuracy = accuracy_score(np.argmax(valid_y, 1).astype('int32'), valid_predictions)
             if epoch % 5 == 0:
-                print('EPOCH: {epoch}, Training cost: {train_cost}, Validation cost: {valid_cost}, Validation F1: {score}'.format(epoch=epoch, train_cost=np.mean(train_costs), valid_cost=np.mean(valid_costs), score=score))
+                print('EPOCH: {epoch}, Training cost: {train_cost}, Validation cost: {valid_cost}, Validation F1: {f1_score}, Validation Accuracy: {accuracy} '
+                      .format(epoch=epoch, train_cost=np.mean(train_costs), valid_cost=np.mean(valid_costs), f1_score=f1_score, accuracy=))
 
             if early_stopping.check(np.mean(valid_costs)):
                 break
