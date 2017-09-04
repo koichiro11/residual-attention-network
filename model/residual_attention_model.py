@@ -30,7 +30,6 @@ class ResidualAttentionModel(object):
     def _build_model(self):
         """
         build model for specific data
-        :param target: used dataset. default is 'ImageNet'
         """
         if self.target == "ImageNet":
             """

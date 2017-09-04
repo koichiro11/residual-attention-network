@@ -110,6 +110,7 @@ if __name__ == "__main__":
     print("start to train...")
     with tf.Session() as sess:
         init = tf.global_variables_initializer()
+        sess.run(init)
         for epoch in range(NUM_EPOCHS):
             train_X, train_y = shuffle(train_X, train_y, random_state=random_state)
             # batch_train_X, batch_valid_X, batch_train_y, batch_valid_y = train_test_split(train_X, train_y, train_size=0.8, random_state=random_state)
