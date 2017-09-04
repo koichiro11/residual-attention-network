@@ -4,7 +4,6 @@ attention module of Residual Attention Network
 """
 
 import tensorflow as tf
-from tensorflow.contrib.keras.python.keras.layers import UpSampling2D
 import numpy as np
 
 
@@ -37,13 +36,15 @@ convoluted_image = tf.nn.conv2d(x, W, strides=[1, 2, 2, 1], padding='SAME')
 
 pooling_image = tf.nn.avg_pool(x, ksize=[1, 7, 7, 1], strides=[1, 1, 1, 1], padding='VALID')
 
+initial = tf.truncated_normal([3, 3, 3, 6], stddev=0.1)
+
 # shape = convoluted_image.get_shape()
-"""
+
 with tf.Session() as sess:
     # print(sess.run(convoluted_image, feed_dict={x: sample_image}).shape)
-    print(sess.run(pooling_image, feed_dict={x: sample_image}).shape)
+    # print(sess.run(pooling_image, feed_dict={x: sample_image}).shape)
     # print(sess.run(shape, feed_dict={x: sample_image}))
-
+    print(sess.run(initial).shape)
     sess.close()
-"""
-print(UpSampling2D(size=(2, 2), data_format=None)(sample_image))
+
+# print(UpSampling2D(size=(2, 2), data_format=None)(sample_image))

@@ -36,13 +36,14 @@ class Dense(Layer):
         :param shape: shape of weight (ex:[input_dim, output_dim]
         :param function: activation ex:)tf.nn.softmax
         """
-        super().__init__(self, shape)
+        super().__init__(shape)
         # Xavier Initialization
         self.function = function
 
     def f_prop(self, x):
         """forward propagation"""
         return self.sfunction(tf.matmul(x, self.W) + self.b)
+
 
 class Conv(Layer):
     """Convolution layer"""
@@ -52,7 +53,8 @@ class Conv(Layer):
         :param strides: strides of kernel
         :param padding: padding type ["SAME", "VALID"]
         """
-        super().__init__(self, shape)
+        self.W = self.weight_variable(shape)
+        self.b = tf.Variable(tf.zeros([shape[3]]))
         self.strides = strides
         self.padding = padding
 
@@ -102,7 +104,10 @@ class ResidualBlock(object):
         :param output_channels: dimension of output channel. input_channel -> output_channel
         """
         self.input_channels = input_channels
-        self.output_channels = output_channels
+        if output_channels is not None:
+            self.output_channels = output_channels
+        else:
+            self.output_channels = input_channels
         self.stride = stride
         # graph
         self.batch_normalization = BatchNormalization(self.input_channels)

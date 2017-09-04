@@ -22,8 +22,8 @@ rng = np.random.RandomState(1234)
 random_state = 42
 NUM_EPOCHS = 100
 BATCH_SIZE = 64
-DATASET_PATH = "~/residual-attention-network/dataset/"
-SAVE_PATH = "~/residual-attention-network/trained_models/model.ckpt"
+DATASET_PATH = "residual-attention-network/dataset/"
+SAVE_PATH = "residual-attention-network/trained_models/model.ckpt"
 
 
 if __name__ == "__main__":
@@ -33,16 +33,17 @@ if __name__ == "__main__":
     if len(param) == 2:
         target_dataset = param[1]
         if target_dataset == "CIFER-10":
-            raise ValueError("Now you can use only 'CIFER-10' for training. "
+            raise ValueError("Now you can use only 'CIFAR-10' for training. "
                              "Please specify valid DataSet {'CIFER-10'} or "
                              "write build_model method in ResidualAttentionModel class by yourself.")
 
     else:
-        target_dataset = "CIFER-10"
+        target_dataset = "CIFAR-10"
 
     print("load {dataset} data...".format(dataset=target_dataset))
-    if target_dataset == "CIFER-10":
-        if os.path.exits(DATASET_PATH + target_dataset + "/train_X.pkl"):
+    if target_dataset == "CIFAR-10":
+        if os.path.exists(DATASET_PATH + target_dataset):
+            print("load data from pickle")
             with open(DATASET_PATH + target_dataset + "/train_X.pkl", 'rb') as f:
                 train_X = pickle.load(f)
             with open(DATASET_PATH + target_dataset + "/train_y.pkl", 'rb') as f:
@@ -68,6 +69,7 @@ if __name__ == "__main__":
             train_X, valid_X, train_y, valid_y = train_test_split(train_X, train_y, test_size=5000,
                                                                   random_state=random_state)
 
+            os.mkdir(DATASET_PATH + target_dataset)
             with open(DATASET_PATH + target_dataset + "/train_X.pkl", 'wb') as f1:
                 pickle.dump(train_X, f1)
             with open(DATASET_PATH + target_dataset + "/train_y.pkl", 'wb') as f1:

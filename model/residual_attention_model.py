@@ -22,7 +22,7 @@ class ResidualAttentionModel(object):
 
         self.average_pooling_kernel = None
 
-    def __call__(self, target="ImageNet"):
+    def __call__(self, target="CIFAR-10"):
         self.target = target
         self._build_model()
 
@@ -59,7 +59,7 @@ class ResidualAttentionModel(object):
             # FC, softmax, [None, 1024]
             self.average_pooling_kernel = [1, 7, 7, 1]
             self.dense = Dense([1024, self.output_dim])
-        elif self.target == "CIFAR=10":
+        elif self.target == "CIFAR-10":
             """
             CIFER-10.shape = [None, 32, 32, 3]
             """
@@ -87,7 +87,7 @@ class ResidualAttentionModel(object):
             self.average_pooling_kernel = [1, 4, 4, 1]
             self.dense = Dense([1024, self.output_dim])
         else:
-            raise ValueError("this class is not for {target} dataset. Please write build_model method by yourself.".format(target=target))
+            raise ValueError("this class is not for {target} dataset. Please write build_model method by yourself.".format(target=self.target))
 
     def f_prop(self, x):
         """
