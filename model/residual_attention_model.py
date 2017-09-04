@@ -4,6 +4,7 @@ Residual Attention Network
 """
 
 import tensorflow as tf
+import numpy as np
 
 from .basic_layers import Dense, Conv, ResidualBlock
 from .attention_module import AttentionModule
@@ -119,6 +120,7 @@ class ResidualAttentionModel(object):
 
         # average pooling
         x = tf.nn.avg_pool(x, ksize=self.average_pooling_kernel, strides=[1, 1, 1, 1], padding='VALID')
+        x = tf.reshape(x, (-1, np.prod(x.get_shape().as_list()[1:])))
 
         # FC, softmax
         y = self.dense.f_prop(x)
