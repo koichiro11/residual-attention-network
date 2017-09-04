@@ -80,7 +80,7 @@ class ResidualAttentionModel(object):
             # residual block, x -> [None, row/4, line/4, 512]
             self.residual_block3 = ResidualBlock(64, output_channels=128, stride=2)
             # attention module, x -> [None, row/4, line/4, 512]
-            self.attention_module3 = AttentionModule(512)
+            self.attention_module3 = AttentionModule(128)
             # residual block, x -> [None, row/8, line/8, 1024]
             self.residual_block4 = ResidualBlock(128, output_channels=256, stride=2)
             # FC, softmax, [None, 1024]
