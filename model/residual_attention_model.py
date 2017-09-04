@@ -104,7 +104,7 @@ class ResidualAttentionModel(object):
         x = tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
         x = self.residual_block1.f_prop(x)
-        # <bound method Tensor.get_shape of <tf.Tensor 'add:0' shape=(?, 16, 16, 128) dtype=float32>>
+
         x = self.attention_module1.f_prop(x)
 
         x = self.residual_block2.f_prop(x)
