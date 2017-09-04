@@ -126,9 +126,8 @@ if __name__ == "__main__":
                 # print(i)
                 start = i * BATCH_SIZE
                 end = start + BATCH_SIZE
-                _, loss = sess.run([train, loss],
-                              feed_dict={x: train_X[start:end], t: train_y[start:end]})
-                train_costs.append(loss)
+                _, _loss = sess.run([train, loss], feed_dict={x: train_X[start:end], t: train_y[start:end]})
+                train_costs.append(_loss)
 
             # valid
             valid_costs = []
@@ -137,7 +136,7 @@ if __name__ == "__main__":
                 start = i * BATCH_SIZE
                 end = start + BATCH_SIZE
                 pred, valid_cost = sess.run([valid, loss], feed_dict={x: valid_X[start:end], t: valid_y[start:end]})
-                valid_predictions.extend(tf.argmax(pred, 1))
+                valid_predictions.extend(pred)
                 valid_costs.append(valid_cost)
 
             score = f1_score(valid_y, valid_predictions, average='macro')
