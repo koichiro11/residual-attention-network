@@ -33,17 +33,17 @@ class AttentionModule(object):
 
         self.second_residual_blocks = []
         for i in range(self.r):
-            self.second_residual_blocks.append(ResidualBlock(self.input_channels/2))
+            self.second_residual_blocks.append(ResidualBlock(self.input_channels))
 
-        self.skip_connection_residual_block = ResidualBlock(self.input_channels/2)
+        self.skip_connection_residual_block = ResidualBlock(self.input_channels)
 
         self.third_residual_blocks = []
         for i in range(self.r*2):
-            self.third_residual_blocks.append(ResidualBlock(self.input_channels / 4))
+            self.third_residual_blocks.append(ResidualBlock(self.input_channels))
 
         self.forth_residual_blocks = []
         for i in range(self.r):
-            self.forth_residual_blocks.append(ResidualBlock(self.input_channels / 2))
+            self.forth_residual_blocks.append(ResidualBlock(self.input_channels))
 
         self.conv_1 = Conv([1, 1, self.input_channels, self.input_channels])
         self.conv_2 = Conv([1, 1, self.input_channels, self.input_channels])
@@ -58,11 +58,9 @@ class AttentionModule(object):
         :param x:
         :return:
         """
-        ## set channels
-        input_channels = x.get_shape().as_list()[3]
 
         ## first residual blocks
-        for block in self.first_residual_block:
+        for block in self.first_residual_blocks:
             x = block.f_prop(x)
 
         ## trunk branch

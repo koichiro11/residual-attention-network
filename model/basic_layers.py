@@ -64,7 +64,7 @@ class Conv(Layer):
         return conv
 
 
-class BatchNormalization(object):
+class BatchNormalization(Layer):
     """
     batch normalization
     """
@@ -77,6 +77,8 @@ class BatchNormalization(object):
         self.channels = channels
         self.variance_epsilon = variance_epsilon
         self.scale_after_normalization = scale_after_normalization
+        self.beta = tf.Variable(tf.zeros([self.channels]), name="beta")
+        self.gamma = self.weight_variable([self.channels], name="gamma")
 
     def f_prop(self, x):
         """
@@ -85,11 +87,9 @@ class BatchNormalization(object):
         :return: batch normalized x
         """
         mean, var = tf.nn.moments(x, axes=[0, 1, 2])
-        beta = tf.Variable(tf.zeros([self.channels]), name="beta")
-        gamma = self.weight_variable([self.channels], name="gamma")
 
         batch_norm = tf.nn.batch_norm_with_global_normalization(
-            x, mean, var, beta, gamma, self.variance_epsilon,
+            x, mean, var, self.beta, self.gamma, self.variance_epsilon,
             scale_after_normalization=self.scale_after_normalization)
 
         # relu
@@ -98,7 +98,7 @@ class BatchNormalization(object):
 
 class ResidualBlock(object):
     """residual block proposed by https://arxiv.org/pdf/1603.05027.pdf"""
-    def __init__(self, input_channels, stride=1, output_channels=None):
+    def __init__(self, input_channels, output_channels=None, stride=1):
         """
         :param input_channels: dimension of input channel.
         :param output_channels: dimension of output channel. input_channel -> output_channel
@@ -123,9 +123,6 @@ class ResidualBlock(object):
         :param x: input x
         :return: output residual block
         """
-        # set channels
-        if self.output_channels is None:
-            self.output_channels = self.input_channels
 
         # batch normalization & ReLU
         batch_normed_output = self.batch_normalization.f_prop(x)

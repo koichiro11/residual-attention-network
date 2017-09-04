@@ -100,7 +100,7 @@ if __name__ == "__main__":
     x = tf.placeholder(tf.float32, [None, 32, 32, 3])
     t = tf.placeholder(tf.float32, [None, 10])
 
-    y = model.f_props(x)
+    y = model.f_prop(x)
 
     loss = tf.nn.softmax_cross_entropy_with_logits(logits=y, labels=t)
     # self.cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
