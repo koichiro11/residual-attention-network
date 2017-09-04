@@ -141,7 +141,7 @@ if __name__ == "__main__":
                 valid_predictions.extend(pred)
                 valid_costs.append(valid_cost)
 
-            score = f1_score(valid_y, valid_predictions, average='macro')
+            score = f1_score(np.argmax(valid_y, 1).astype('int32'), valid_predictions, average='macro')
             if epoch % 5 == 0:
                 print('EPOCH: {epoch}, Training cost: {train_cost}, Validation cost: {valid_cost}, Validation F1: {score}'.format(epoch=epoch, train_cost=np.mean(train_costs), valid_cost=np.mean(valid_costs), score=score))
 
