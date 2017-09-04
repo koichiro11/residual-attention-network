@@ -84,7 +84,7 @@ class ResidualAttentionModel(object):
             # residual block, x -> [None, row/8, line/8, 1024]
             self.residual_block4 = ResidualBlock(256, output_channels=512, stride=2)
             # FC, softmax, [None, 1024]
-            self.average_pooling_kernel = [1, 8, 8, 1]
+            self.average_pooling_kernel = [1, 4, 4, 1]
             self.dense = Dense([512, self.output_dim])
         else:
             raise ValueError("this class is not for {target} dataset. Please write build_model method by yourself.".format(target=self.target))
