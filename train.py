@@ -146,10 +146,11 @@ if __name__ == "__main__":
                 print('EPOCH: {epoch}, Training cost: {train_cost}, Validation cost: {valid_cost}, Validation F1: {score}'.format(epoch=epoch, train_cost=np.mean(train_costs), valid_cost=np.mean(valid_costs), score=score))
 
             if early_stopping.check(np.mean(valid_costs)):
-                print("save model...")
-                saver = tf.train.Saver()
-                saver.save(sess, SAVE_PATH, global_step=epoch)
                 break
+
+        print("save model...")
+        saver = tf.train.Saver()
+        saver.save(sess, SAVE_PATH, global_step=epoch)
 
 
 
