@@ -107,6 +107,10 @@ if __name__ == "__main__":
     train = tf.train.AdamOptimizer(1e-4).minimize(tf.reduce_mean(loss))
     valid = tf.argmax(y, 1)
 
+    print("check shape of data...")
+    print("train_X: {shape}".format(shape=train_X.shape))
+    print("train_y: {shape}".format(shape=train_y.shape))
+
     print("start to train...")
     with tf.Session() as sess:
         init = tf.global_variables_initializer()
@@ -132,7 +136,7 @@ if __name__ == "__main__":
             for i in range(n_batches):
                 start = i * BATCH_SIZE
                 end = start + BATCH_SIZE
-                pred, valid_cost = sess.run([valid, loss], feed_dict={x: valid_X, t: valid_y})
+                pred, valid_cost = sess.run([valid, loss], feed_dict={x: valid_X[start:end], t: valid_y[start:end]})
                 valid_predictions.extend(tf.argmax(pred, 1))
                 valid_costs.append(valid_cost)
 
