@@ -4,7 +4,9 @@ Residual Attention Network
 """
 
 import sys
+import os
 import numpy as np
+import pickle
 
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
@@ -20,6 +22,7 @@ rng = np.random.RandomState(1234)
 random_state = 42
 NUM_EPOCHS = 100
 BATCH_SIZE = 64
+DATASET_PATH = "~/residual-attention-network/dataset/"
 SAVE_PATH = "~/residual-attention-network/trained_models/model.ckpt"
 
 
@@ -39,17 +42,45 @@ if __name__ == "__main__":
 
     print("load {dataset} data...".format(dataset=target_dataset))
     if target_dataset == "CIFER-10":
-        (cifar_X_1, cifar_y_1), (cifar_X_2, cifar_y_2) = cifar10.load_data()
-        cifar_X = np.r_[cifar_X_1, cifar_X_2]
-        cifar_y = np.r_[cifar_y_1, cifar_y_2]
+        if os.path.exits(DATASET_PATH + target_dataset + "/train_X.pkl"):
+            with open(DATASET_PATH + target_dataset + "/train_X.pkl", 'rb') as f:
+                train_X = pickle.load(f)
+            with open(DATASET_PATH + target_dataset + "/train_y.pkl", 'rb') as f:
+                train_y = pickle.load(f)
+            with open(DATASET_PATH + target_dataset + "/valid_X.pkl", 'rb') as f:
+                valid_X = pickle.load(f)
+            with open(DATASET_PATH + target_dataset + "/valid_y.pkl", 'rb') as f:
+                valid_y = pickle.load(f)
+            with open(DATASET_PATH + target_dataset + "/test_X.pkl", 'rb') as f:
+                test_X = pickle.load(f)
+            with open(DATASET_PATH + target_dataset + "/test_y.pkl", 'rb') as f:
+                test_y = pickle.load(f)
+        else:
+            (cifar_X_1, cifar_y_1), (cifar_X_2, cifar_y_2) = cifar10.load_data()
+            cifar_X = np.r_[cifar_X_1, cifar_X_2]
+            cifar_y = np.r_[cifar_y_1, cifar_y_2]
 
-        cifar_X = cifar_X.astype('float32') / 255
-        cifar_y = np.eye(10)[cifar_y.astype('int32').flatten()]
+            cifar_X = cifar_X.astype('float32') / 255
+            cifar_y = np.eye(10)[cifar_y.astype('int32').flatten()]
 
-        train_X, test_X, train_y, test_y = train_test_split(cifar_X, cifar_y, test_size=5000,
-                                                            random_state=random_state)
-        train_X, valid_X, train_y, valid_y = train_test_split(train_X, train_y, test_size=5000,
-                                                              random_state=random_state)
+            train_X, test_X, train_y, test_y = train_test_split(cifar_X, cifar_y, test_size=5000,
+                                                                random_state=random_state)
+            train_X, valid_X, train_y, valid_y = train_test_split(train_X, train_y, test_size=5000,
+                                                                  random_state=random_state)
+
+            with open(DATASET_PATH + target_dataset + "/train_X.pkl", 'wb') as f1:
+                pickle.dump(train_X, f1)
+            with open(DATASET_PATH + target_dataset + "/train_y.pkl", 'wb') as f1:
+                pickle.dump(train_y, f1)
+            with open(DATASET_PATH + target_dataset + "/valid_X.pkl", 'wb') as f1:
+                pickle.dump(valid_X, f1)
+            with open(DATASET_PATH + target_dataset + "/valid_y.pkl", 'wb') as f1:
+                pickle.dump(valid_y, f1)
+            with open(DATASET_PATH + target_dataset + "/test_X.pkl", 'wb') as f1:
+                pickle.dump(test_X, f1)
+            with open(DATASET_PATH + target_dataset + "/test_y.pkl", 'wb') as f1:
+                pickle.dump(test_y, f1)
+
     elif target_dataset == "ImageNet":
         # TODO(write code to load DataSet for ImageNet)
         print("TODO(load DataSet for ImageNet)")
@@ -61,7 +92,7 @@ if __name__ == "__main__":
 
     print("build graph...")
     model = ResidualAttentionModel()
-    model.build_model(target=target_dataset)
+    model(target=target_dataset)
     early_stopping = EarlyStopping()
 
     x = tf.placeholder(tf.float32, [None, 32, 32, 3])

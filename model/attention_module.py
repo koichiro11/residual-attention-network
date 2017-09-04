@@ -4,7 +4,7 @@ attention module of Residual Attention Network
 """
 
 import tensorflow as tf
-from tf.contrib.keras.layers import UpSampling2D
+from keras.layers.convolutional import UpSampling2D
 
 from .basic_layers import Conv, ResidualBlock
 
