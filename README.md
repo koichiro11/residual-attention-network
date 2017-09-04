@@ -42,11 +42,11 @@ Note that, our method achieves 0.6% top-1 accuracy improvement with 46% trunk de
 The experiment also demonstrates that our network is robust against noisy labels.
 ```
 
-## About this code & explanation of [Residual Attention Network for Image Classification](https://arxiv.org/abs/1704.06904)
+## About this code & explanation
 
 ### purpose
 
-This code is written by Koichiro Tamura (http://koichirotamura.com/)
+This code is written by [Koichiro Tamura](http://koichirotamura.com/)
 in order to understand [Residual Attention Network for Image Classification](https://arxiv.org/abs/1704.06904).
 
 
