@@ -82,7 +82,7 @@ class ResidualAttentionModel(object):
             # attention module, x -> [None, row/4, line/4, 512]
             self.attention_module3 = AttentionModule(256)
             # residual block, x -> [None, row/8, line/8, 1024]
-            self.residual_block4 = ResidualBlock(128, output_channels=512, stride=2)
+            self.residual_block4 = ResidualBlock(256, output_channels=512, stride=2)
             # FC, softmax, [None, 1024]
             self.average_pooling_kernel = [1, 8, 8, 1]
             self.dense = Dense([512, self.output_dim])
