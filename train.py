@@ -135,8 +135,8 @@ if __name__ == "__main__":
             valid_predictions = []
             n_batches = valid_X.shape[0] // VALID_BATCH_SIZE
             for i in range(n_batches):
-                start = i * BATCH_SIZE
-                end = start + BATCH_SIZE
+                start = i * VALID_BATCH_SIZE
+                end = start + VALID_BATCH_SIZE
                 pred, valid_cost = sess.run([valid, loss], feed_dict={x: valid_X[start:end], t: valid_y[start:end]})
                 valid_predictions.extend(pred)
                 valid_costs.append(valid_cost)
