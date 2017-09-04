@@ -107,9 +107,9 @@ class ResidualAttentionModel(object):
 
         x = self.attention_module1.f_prop(x)
 
-        x = self.residual_block2.f_prop(x)
+        # x = self.residual_block2.f_prop(x)
 
-        x = self.attention_module2.f_prop(x)
+        # x = self.attention_module2.f_prop(x)
 
         x = self.residual_block3.f_prop(x)
 
