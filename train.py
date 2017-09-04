@@ -96,7 +96,7 @@ if __name__ == "__main__":
     print("build graph...")
     model = ResidualAttentionModel()
     model(target=target_dataset)
-    early_stopping = EarlyStopping()
+    early_stopping = EarlyStopping(limit=30)
 
     x = tf.placeholder(tf.float32, [None, 32, 32, 3])
     t = tf.placeholder(tf.float32, [None, 10])
