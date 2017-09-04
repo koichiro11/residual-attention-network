@@ -42,7 +42,7 @@ class Dense(Layer):
 
     def f_prop(self, x):
         """forward propagation"""
-        return self.sfunction(tf.matmul(x, self.W) + self.b)
+        return self.function(tf.matmul(x, self.W) + self.b)
 
 
 class Conv(Layer):

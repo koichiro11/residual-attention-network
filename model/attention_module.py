@@ -45,8 +45,8 @@ class AttentionModule(object):
         for i in range(self.r):
             self.forth_residual_blocks.append(ResidualBlock(self.input_channels))
 
-        self.conv_1 = Conv([1, 1, self.input_channels, self.input_channels])
-        self.conv_2 = Conv([1, 1, self.input_channels, self.input_channels])
+        self.conv1 = Conv([1, 1, self.input_channels, self.input_channels], strides=[1, 1, 1, 1])
+        self.conv2 = Conv([1, 1, self.input_channels, self.input_channels], strides=[1, 1, 1, 1])
 
         self.fifth_residual_blocks = []
         for i in range(self.p):
