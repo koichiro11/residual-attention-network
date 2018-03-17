@@ -103,7 +103,7 @@ if __name__ == "__main__":
 
     y = model.f_prop(x)
 
-    loss = tf.nn.softmax_cross_entropy_with_logits(logits=y, labels=t)
+    loss = tf.nn.sparse_softmax_cross_entropy(logits=y, labels=t)
     # self.cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
     train = tf.train.AdamOptimizer(1e-3).minimize(tf.reduce_mean(loss))
     valid = tf.argmax(y, 1)
@@ -120,6 +120,7 @@ if __name__ == "__main__":
             train_X, train_y = shuffle(train_X, train_y, random_state=random_state)
             # batch_train_X, batch_valid_X, batch_train_y, batch_valid_y = train_test_split(train_X, train_y, train_size=0.8, random_state=random_state)
             n_batches = train_X.shape[0] // BATCH_SIZE
+            print(train_y[0])
 
             # train
             train_costs = []
