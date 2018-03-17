@@ -51,7 +51,7 @@ class AttentionModule(object):
                     filter_ = [1, 2, 2, 1]
                     output_soft_mask = tf.nn.max_pool(input, ksize=filter_, strides=filter_, padding='SAME')
 
-                    for i in self.r:
+                    for i in range(self.r):
                         output_soft_mask = self.residual_block.f_prop(output_soft_mask, input_channels, scope="num_blocks_{}".format(i), is_training=is_training)
 
                 with tf.variable_scope("skip_connection"):
@@ -64,11 +64,11 @@ class AttentionModule(object):
                     filter_ = [1, 2, 2, 1]
                     output_soft_mask = tf.nn.max_pool(output_soft_mask, ksize=filter_, strides=filter_, padding='SAME')
 
-                    for i in self.r:
+                    for i in range(self.r):
                         output_soft_mask = self.residual_block.f_prop(output_soft_mask, input_channels, scope="num_blocks_{}".format(i), is_training=is_training)
 
                 with tf.variable_scope("up_sampling_1"):
-                    for i in self.r:
+                    for i in range(self.r):
                         output_soft_mask = self.residual_block.f_prop(output_soft_mask, input_channels, scope="num_blocks_{}".format(i), is_training=is_training)
 
                     # interpolation
@@ -78,7 +78,7 @@ class AttentionModule(object):
                 output_soft_mask += output_skip_connection
 
                 with tf.variable_scope("up_sampling_2"):
-                    for i in self.r:
+                    for i in range(self.r):
                         output_soft_mask = self.residual_block.f_prop(output_soft_mask, input_channels, scope="num_blocks_{}".format(i), is_training=is_training)
 
                     # interpolation
