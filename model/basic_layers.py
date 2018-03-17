@@ -121,6 +121,6 @@ class ResidualBlock(object):
                                 mean_var_with_update,
                                 lambda: (ema.average(batch_mean), ema.average(batch_var)))
             normed = tf.nn.batch_normalization(x, mean, var, beta, gamma, 1e-3)
-        return tf.relu(normed)
+        return tf.nn.relu(normed)
 
 
