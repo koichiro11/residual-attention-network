@@ -44,9 +44,9 @@ class AttentionModule(object):
                 for i in range(self.t):
                     output_trunk = self.residual_block.f_prop(output_trunk, input_channels, scope="num_blocks_{}".format(i), is_training=is_training)
 
-            with tf.varable_scope("soft_mask_branch"):
+            with tf.variable_scope("soft_mask_branch"):
 
-                with tf.varable_scope("down_sampling_1"):
+                with tf.variable_scope("down_sampling_1"):
                     # max pooling
                     filter_ = [1, 2, 2, 1]
                     output_soft_mask = tf.nn.max_pool(input, ksize=filter_, strides=filter_, padding='SAME')
@@ -54,12 +54,12 @@ class AttentionModule(object):
                     for i in self.r:
                         output_soft_mask = self.residual_block.f_prop(output_soft_mask, input_channels, scope="num_blocks_{}".format(i), is_training=is_training)
 
-                with tf.varable_scope("skip_connection"):
+                with tf.variable_scope("skip_connection"):
                     # TODO(define new blocks)
                     output_skip_connection = self.residual_block.f_prop(output_soft_mask, input_channels, is_training=is_training)
 
 
-                with tf.varable_scope("down_sampling_2"):
+                with tf.variable_scope("down_sampling_2"):
                     # max pooling
                     filter_ = [1, 2, 2, 1]
                     output_soft_mask = tf.nn.max_pool(output_soft_mask, ksize=filter_, strides=filter_, padding='SAME')
@@ -67,7 +67,7 @@ class AttentionModule(object):
                     for i in self.r:
                         output_soft_mask = self.residual_block.f_prop(output_soft_mask, input_channels, scope="num_blocks_{}".format(i), is_training=is_training)
 
-                with tf.varable_scope("up_sampling_1"):
+                with tf.variable_scope("up_sampling_1"):
                     for i in self.r:
                         output_soft_mask = self.residual_block.f_prop(output_soft_mask, input_channels, scope="num_blocks_{}".format(i), is_training=is_training)
 
@@ -77,7 +77,7 @@ class AttentionModule(object):
                 # add skip connection
                 output_soft_mask += output_skip_connection
 
-                with tf.varable_scope("up_sampling_2"):
+                with tf.variable_scope("up_sampling_2"):
                     for i in self.r:
                         output_soft_mask = self.residual_block.f_prop(output_soft_mask, input_channels, scope="num_blocks_{}".format(i), is_training=is_training)
 
