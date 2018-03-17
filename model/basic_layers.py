@@ -45,60 +45,13 @@ class Dense(Layer):
         return self.function(tf.matmul(x, self.W) + self.b)
 
 
-class Conv(Layer):
-    """Convolution layer"""
-    def __init__(self, shape, strides=[1, 2, 2, 1], padding="SAME"):
-        """
-        :param shape: shape of filter weight (ex:[row of filter, line of filter , input channel, output channel]
-        :param strides: strides of kernel
-        :param padding: padding type ["SAME", "VALID"]
-        """
-        self.W = self.weight_variable(shape)
-        self.b = tf.Variable(tf.zeros([shape[3]]))
-        self.strides = strides
-        self.padding = padding
-
-    def f_prop(self, x):
-        """forward propagation"""
-        conv = tf.nn.conv2d(x, filter=self.W, strides=self.strides, padding=self.padding)
-        return conv
-
-
-class BatchNormalization(Layer):
+class ResidualBlock(Layer):
     """
-    batch normalization
+    residual block proposed by https://arxiv.org/pdf/1603.05027.pdf
+    tensorflow version=r1.4
+
     """
-    def __init__(self, channels, variance_epsilon=0.001, scale_after_normalization=True):
-        """
-        :param channels: channels of input data
-        :param variance_epsilon:  A small float number to avoid dividing by 0
-        :param scale_after_normalization: A bool indicating whether the resulted tensor needs to be multiplied with gamma
-        """
-        self.channels = channels
-        self.variance_epsilon = variance_epsilon
-        self.scale_after_normalization = scale_after_normalization
-        self.beta = tf.Variable(tf.zeros([self.channels]), name="beta")
-        self.gamma = self.weight_variable([self.channels], name="gamma")
-
-    def f_prop(self, x):
-        """
-        batch normalization
-        :param x: input x
-        :return: batch normalized x
-        """
-        mean, var = tf.nn.moments(x, axes=[0, 1, 2])
-
-        batch_norm = tf.nn.batch_norm_with_global_normalization(
-            x, mean, var, self.beta, self.gamma, self.variance_epsilon,
-            scale_after_normalization=self.scale_after_normalization)
-
-        # relu
-        return tf.nn.relu(batch_norm)
-
-
-class ResidualBlock(object):
-    """residual block proposed by https://arxiv.org/pdf/1603.05027.pdf"""
-    def __init__(self, input_channels, output_channels=None, stride=1):
+    def __init__(self, input_channels, output_channels=None, stride=1, kernel_size=3):
         """
         :param input_channels: dimension of input channel.
         :param output_channels: dimension of output channel. input_channel -> output_channel
@@ -109,37 +62,62 @@ class ResidualBlock(object):
         else:
             self.output_channels = input_channels
         self.stride = stride
-        # graph
-        self.batch_normalization = BatchNormalization(self.input_channels)
-        self.conv1 = Conv([3, 3, self.input_channels, self.output_channels], strides=[1, 1, 1, 1])
-        self.batch_normalization_2 = BatchNormalization(self.output_channels)
-        self.conv2 = Conv([3, 3, self.output_channels, self.output_channels], strides=[1, stride, stride, 1])
+        self.kernel_size = kernel_size
 
-        self._conv = Conv([1, 1, self.input_channels, self.output_channels], strides=[1, stride, stride, 1])
-
-    def f_prop(self, x):
+    def f_prop(self, _input, scope="residual_block", is_training=True):
         """
         forward propagation
-        :param x: input x
+        :param _input: A Tensor
+        :param scope: str, tensorflow name scope
+        :param is_training: boolean, whether training step or not(test step)
         :return: output residual block
         """
+        with tf.variable_scope(scope):
 
-        # batch normalization & ReLU
-        batch_normed_output = self.batch_normalization.f_prop(x)
+            # batch normalization & ReLU TODO(this function should be updated when the TF version changes)
+            x = self.batch_normalization(_input, self.input_channels, is_training)
 
-        # convolution1: change channels
-        output_conv1 = self.conv1.f_prop(batch_normed_output)
+            x = tf.layers.conv2d(x, filters=self.input_channels, kernel_size=self.kernel_size)
 
-        # batch normalization & ReLU
-        batch_normed_output = self.batch_normalization_2.f_prop(output_conv1)
+            # batch normalization & ReLU TODO(this function should be updated when the TF version changes)
+            x = self.batch_normalization(x, self.input_channels, is_training)
 
-        # convolution2
-        output_conv2 = self.conv2.f_prop(batch_normed_output)
+            x = tf.layers.conv2d(x, filters=self.input_channels, kernel_size=self.kernel_size, strides=self.stride)
 
-        if (self.input_channels != self.output_channels) or (self.stride!=1):
-            input_layer = self._conv.f_prop(x)
-        else:
-            input_layer = x
+            # update input
+            if (self.input_channels != self.output_channels) or (self.stride!=1):
+                _input = tf.layers.conv1d(_input, self.output_channels, strides=self.stride)
 
-        res = output_conv2 + input_layer
-        return res
+            output = x + _input
+
+            return output
+
+    def batch_normalization(self,
+                            x,
+                            channels,
+                            variance_epsilon=0.001,
+                            scale_after_normalization=True,
+                            scope="batch_norm",
+                            is_training=True):
+        """
+        batch normalization
+        :param x: input x
+        :param channels: channels of input data
+        :param variance_epsilon:  A small float number to avoid dividing by 0
+        :param scale_after_normalization: A bool indicating whether the resulted tensor needs to be multiplied with gamma
+        :param scope: str, tensorflow name scope
+        :param is_training: boolean, whether training step or not(test step)
+        :return: batch normalized x
+        """
+        with tf.variable_scope(scope):
+            beta = tf.Variable(tf.zeros([channels]), name="beta")
+            gamma = self.weight_variable([channels], name="gamma")
+            if is_training:
+                mean, var = tf.nn.moments(x, axes=[0, 1, 2])
+
+                x = tf.nn.batch_norm_with_global_normalization(
+                    x, mean, var, beta, gamma, variance_epsilon,
+                    scale_after_normalization=scale_after_normalization)
+            # relu
+            return tf.nn.relu(x)
+

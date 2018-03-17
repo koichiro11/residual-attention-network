@@ -15,17 +15,14 @@ class ResidualAttentionModel(object):
     Residual Attention Network
     URL: https://arxiv.org/abs/1704.06904
     """
-    def __init__(self):
+    def __init__(self, target="CIFAR-10"):
         """
         :param input_shape: the list of input shape (ex: [None, 28, 28 ,3]
         :param output_dim:
         """
-
-        self.average_pooling_kernel = None
-
-    def __call__(self, target="CIFAR-10"):
         self.target = target
         self._build_model()
+        self.average_pooling_kernel = None
 
     def _build_model(self):
         """
@@ -66,7 +63,7 @@ class ResidualAttentionModel(object):
             self.input_shape = [-1, 32, 32, 3]
             self.output_dim = 10
             # conv, x -> [None, row, line, 64]
-            self.conv1 = Conv([7, 7, self.input_shape[3], 32], strides=[1, 1, 1, 1])
+            Conv([7, 7, self.input_shape[3], 32], strides=[1, 1, 1, 1])
             # max pooling, x -> [None, row/2, line/2, 64]
 
             # residual block, x -> [None, row/2, line/2, 128]
@@ -98,7 +95,7 @@ class ResidualAttentionModel(object):
         # x = [None, row, line, channel]
 
         # conv, x -> [None, row/2, line/2, 64]
-        x = self.conv1.f_prop(x)
+        x = tf.layers.conv2d(x, filters=32, kernel_size=7, strides=1)
 
         # max pooling, x -> [None, row/4, line/4, 64]
         x = tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
