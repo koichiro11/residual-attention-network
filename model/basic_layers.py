@@ -45,79 +45,82 @@ class Dense(Layer):
         return self.function(tf.matmul(x, self.W) + self.b)
 
 
-class ResidualBlock(Layer):
+class ResidualBlock(object):
     """
     residual block proposed by https://arxiv.org/pdf/1603.05027.pdf
     tensorflow version=r1.4
 
     """
-    def __init__(self, input_channels, output_channels=None, stride=1, kernel_size=3):
+    def __init__(self, kernel_size=3):
         """
-        :param input_channels: dimension of input channel.
-        :param output_channels: dimension of output channel. input_channel -> output_channel
+        :param kernel_size: kernel size of second conv2d
         """
-        self.input_channels = input_channels
-        if output_channels is not None:
-            self.output_channels = output_channels
-        else:
-            self.output_channels = input_channels
-        self.stride = stride
         self.kernel_size = kernel_size
 
-    def f_prop(self, _input, scope="residual_block", is_training=True):
+    def f_prop(self, _input, input_channels, output_channels=None, scope="residual_block", is_training=True):
         """
         forward propagation
         :param _input: A Tensor
+        :param input_channels: dimension of input channel.
+        :param output_channels: dimension of output channel. input_channel -> output_channel
+        :param stride: int stride of kernel
         :param scope: str, tensorflow name scope
         :param is_training: boolean, whether training step or not(test step)
         :return: output residual block
         """
+        if output_channels is None:
+            output_channels = input_channels
+
         with tf.variable_scope(scope):
 
             # batch normalization & ReLU TODO(this function should be updated when the TF version changes)
-            x = self.batch_normalization(_input, self.input_channels, is_training)
+            x = self.batch_norm(_input, input_channels, is_training)
 
-            x = tf.layers.conv2d(x, filters=self.input_channels, kernel_size=self.kernel_size)
+            x = tf.layers.conv2d(x, filters=output_channels, kernel_size=1, padding='SAME')
 
             # batch normalization & ReLU TODO(this function should be updated when the TF version changes)
-            x = self.batch_normalization(x, self.input_channels, is_training)
+            x = self.batch_norm(x, output_channels, is_training)
 
-            x = tf.layers.conv2d(x, filters=self.input_channels, kernel_size=self.kernel_size, strides=self.stride)
+            x = tf.layers.conv2d(x, filters=output_channels, kernel_size=self.kernel_size, strides=1, padding='SAME')
 
             # update input
-            if (self.input_channels != self.output_channels) or (self.stride!=1):
-                _input = tf.layers.conv1d(_input, self.output_channels, strides=self.stride)
+            if input_channels != output_channels:
+                _input = tf.layers.conv1d(_input, filters=output_channels, kernel_size=1, strides=1)
 
             output = x + _input
 
             return output
 
-    def batch_normalization(self,
-                            x,
-                            channels,
-                            variance_epsilon=0.001,
-                            scale_after_normalization=True,
-                            scope="batch_norm",
-                            is_training=True):
+    @staticmethod
+    def batch_norm(x, n_out, is_training=True):
         """
-        batch normalization
-        :param x: input x
-        :param channels: channels of input data
-        :param variance_epsilon:  A small float number to avoid dividing by 0
-        :param scale_after_normalization: A bool indicating whether the resulted tensor needs to be multiplied with gamma
-        :param scope: str, tensorflow name scope
-        :param is_training: boolean, whether training step or not(test step)
-        :return: batch normalized x
+        Batch normalization on convolutional maps.
+        Ref.: http://stackoverflow.com/questions/33949786/how-could-i-use-batch-normalization-in-tensorflow
+        Args:
+            x:           Tensor, 4D BHWD input maps
+            n_out:       integer, depth of input maps
+            is_training: boolean tf.Varialbe, true indicates training phase
+            scope:       string, variable scope
+        Return:
+            normed:      batch-normalized maps
         """
-        with tf.variable_scope(scope):
-            beta = tf.Variable(tf.zeros([channels]), name="beta")
-            gamma = self.weight_variable([channels], name="gamma")
-            if is_training:
-                mean, var = tf.nn.moments(x, axes=[0, 1, 2])
+        with tf.variable_scope('batch_norm'):
+            beta = tf.Variable(tf.constant(0.0, shape=[n_out]),
+                               name='beta', trainable=True)
+            gamma = tf.Variable(tf.constant(1.0, shape=[n_out]),
+                                name='gamma', trainable=True)
+            batch_mean, batch_var = tf.nn.moments(x, [0, 1, 2], name='moments')
+            ema = tf.train.ExponentialMovingAverage(decay=0.5)
 
-                x = tf.nn.batch_norm_with_global_normalization(
-                    x, mean, var, beta, gamma, variance_epsilon,
-                    scale_after_normalization=scale_after_normalization)
-            # relu
-            return tf.nn.relu(x)
+            def mean_var_with_update():
+                ema_apply_op = ema.apply([batch_mean, batch_var])
+                with tf.control_dependencies([ema_apply_op]):
+                    return tf.identity(batch_mean), tf.identity(batch_var)
+
+            mean, var = tf.cond(is_training,
+                                mean_var_with_update,
+                                lambda: (ema.average(batch_mean), ema.average(batch_var)))
+            normed = tf.nn.batch_normalization(x, mean, var, beta, gamma, 1e-3)
+        return tf.relu(normed)
+
 

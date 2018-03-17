@@ -15,7 +15,7 @@ import tensorflow as tf
 from keras.datasets import cifar10
 
 from model.utils import EarlyStopping
-from model.residual_attention_model import ResidualAttentionModel
+from model.residual_attention_network import ResidualAttentionNetwork
 
 # HYPER-PARAMETER
 rng = np.random.RandomState(1234)
@@ -83,23 +83,18 @@ if __name__ == "__main__":
                 pickle.dump(test_X, f1)
             with open(DATASET_PATH + target_dataset + "/test_y.pkl", 'wb') as f1:
                 pickle.dump(test_y, f1)
-
-    elif target_dataset == "ImageNet":
-        # TODO(write code to load DataSet for ImageNet)
-        print("TODO(load DataSet for ImageNet)")
-
     else:
         raise ValueError("Now you can use only 'CIFER-10' for training. "
                          "Please specify valid DataSet {'CIFER-10'} or "
                          "write build_model method in ResidualAttentionModel class by yourself.")
 
     print("build graph...")
-    model = ResidualAttentionModel()
-    model(target=target_dataset)
+    model = ResidualAttentionNetwork()
     early_stopping = EarlyStopping(limit=30)
 
     x = tf.placeholder(tf.float32, [None, 32, 32, 3])
     t = tf.placeholder(tf.float32, [None, 10])
+    is_training = tf.placeholder(tf.bool, shape=())
 
     y = model.f_prop(x)
 
@@ -127,7 +122,7 @@ if __name__ == "__main__":
                 # print(i)
                 start = i * BATCH_SIZE
                 end = start + BATCH_SIZE
-                _, _loss = sess.run([train, loss], feed_dict={x: train_X[start:end], t: train_y[start:end]})
+                _, _loss = sess.run([train, loss], feed_dict={x: train_X[start:end], t: train_y[start:end], is_training: True})
                 train_costs.append(_loss)
 
             # valid
@@ -137,7 +132,7 @@ if __name__ == "__main__":
             for i in range(n_batches):
                 start = i * VALID_BATCH_SIZE
                 end = start + VALID_BATCH_SIZE
-                pred, valid_cost = sess.run([valid, loss], feed_dict={x: valid_X[start:end], t: valid_y[start:end]})
+                pred, valid_cost = sess.run([valid, loss], feed_dict={x: valid_X[start:end], t: valid_y[start:end], is_training: False})
                 valid_predictions.extend(pred)
                 valid_costs.append(valid_cost)
 
@@ -153,17 +148,3 @@ if __name__ == "__main__":
         print("save model...")
         saver = tf.train.Saver()
         saver.save(sess, SAVE_PATH, global_step=epoch)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
