@@ -86,8 +86,8 @@ class AttentionModule(object):
 
 
                 with tf.variable_scope("output"):
-                    output_soft_mask = tf.layers.conv1d(output_soft_mask, filters=input_channels, kernel_size=1)
-                    output_soft_mask = tf.layers.conv1d(output_soft_mask, filters=input_channels, kernel_size=1)
+                    output_soft_mask = tf.layers.conv2d(output_soft_mask, filters=input_channels, kernel_size=1)
+                    output_soft_mask = tf.layers.conv2d(output_soft_mask, filters=input_channels, kernel_size=1)
 
                     # sigmoid
                     output_soft_mask = tf.nn.sigmoid(output_soft_mask)

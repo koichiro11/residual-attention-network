@@ -85,7 +85,7 @@ class ResidualBlock(object):
 
             # update input
             if input_channels != output_channels:
-                _input = tf.layers.conv1d(_input, filters=output_channels, kernel_size=1, strides=1)
+                _input = tf.layers.conv2d(_input, filters=output_channels, kernel_size=1, strides=1)
 
             output = x + _input
 
