@@ -62,7 +62,7 @@ if __name__ == "__main__":
             cifar_X = np.r_[cifar_X_1, cifar_X_2]
             cifar_y = np.r_[cifar_y_1, cifar_y_2]
 
-            cifar_X = cifar_X.astype('float32') / 255
+            cifar_X = cifar_X.astype('float32') / 255.0
             cifar_y = np.eye(10)[cifar_y.astype('int32').flatten()]
 
             train_X, test_X, train_y, test_y = train_test_split(cifar_X, cifar_y, test_size=5000,
@@ -103,7 +103,7 @@ if __name__ == "__main__":
 
     y = model.f_prop(x)
 
-    loss = tf.nn.sparse_softmax_cross_entropy(logits=y, labels=t)
+    loss = tf.nn.softmax_cross_entropy_with_logits(logits=y, labels=t)
     # self.cross_entropy = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
     train = tf.train.AdamOptimizer(1e-3).minimize(tf.reduce_mean(loss))
     valid = tf.argmax(y, 1)
@@ -120,7 +120,6 @@ if __name__ == "__main__":
             train_X, train_y = shuffle(train_X, train_y, random_state=random_state)
             # batch_train_X, batch_valid_X, batch_train_y, batch_valid_y = train_test_split(train_X, train_y, train_size=0.8, random_state=random_state)
             n_batches = train_X.shape[0] // BATCH_SIZE
-            print(train_y[0])
 
             # train
             train_costs = []
