@@ -31,7 +31,7 @@ if __name__ == "__main__":
     y = model.f_prop(x)
 
     # loss = tf.nn.softmax_cross_entropy_with_logits(logits=y, labels=t)
-    loss = tf.reduce_mean(-tf.reduce_sum(y_ * tf.log(y), reduction_indices=[1]))
+    loss = tf.reduce_mean(-tf.reduce_sum(t * tf.log(y+1e-7), reduction_indices=[1]))
     train = tf.train.AdamOptimizer(1e-3).minimize(tf.reduce_mean(loss))
     valid = tf.argmax(y, 1)
 
