@@ -45,101 +45,82 @@ class Dense(Layer):
         return self.function(tf.matmul(x, self.W) + self.b)
 
 
-class Conv(Layer):
-    """Convolution layer"""
-    def __init__(self, shape, strides=[1, 2, 2, 1], padding="SAME"):
-        """
-        :param shape: shape of filter weight (ex:[row of filter, line of filter , input channel, output channel]
-        :param strides: strides of kernel
-        :param padding: padding type ["SAME", "VALID"]
-        """
-        self.W = self.weight_variable(shape)
-        self.b = tf.Variable(tf.zeros([shape[3]]))
-        self.strides = strides
-        self.padding = padding
-
-    def f_prop(self, x):
-        """forward propagation"""
-        conv = tf.nn.conv2d(x, filter=self.W, strides=self.strides, padding=self.padding)
-        return conv
-
-
-class BatchNormalization(Layer):
-    """
-    batch normalization
-    """
-    def __init__(self, channels, variance_epsilon=0.001, scale_after_normalization=True):
-        """
-        :param channels: channels of input data
-        :param variance_epsilon:  A small float number to avoid dividing by 0
-        :param scale_after_normalization: A bool indicating whether the resulted tensor needs to be multiplied with gamma
-        """
-        self.channels = channels
-        self.variance_epsilon = variance_epsilon
-        self.scale_after_normalization = scale_after_normalization
-        self.beta = tf.Variable(tf.zeros([self.channels]), name="beta")
-        self.gamma = self.weight_variable([self.channels], name="gamma")
-
-    def f_prop(self, x):
-        """
-        batch normalization
-        :param x: input x
-        :return: batch normalized x
-        """
-        mean, var = tf.nn.moments(x, axes=[0, 1, 2])
-
-        batch_norm = tf.nn.batch_norm_with_global_normalization(
-            x, mean, var, self.beta, self.gamma, self.variance_epsilon,
-            scale_after_normalization=self.scale_after_normalization)
-
-        # relu
-        return tf.nn.relu(batch_norm)
-
-
 class ResidualBlock(object):
-    """residual block proposed by https://arxiv.org/pdf/1603.05027.pdf"""
-    def __init__(self, input_channels, output_channels=None, stride=1):
-        """
-        :param input_channels: dimension of input channel.
-        :param output_channels: dimension of output channel. input_channel -> output_channel
-        """
-        self.input_channels = input_channels
-        if output_channels is not None:
-            self.output_channels = output_channels
-        else:
-            self.output_channels = input_channels
-        self.stride = stride
-        # graph
-        self.batch_normalization = BatchNormalization(self.input_channels)
-        self.conv1 = Conv([3, 3, self.input_channels, self.output_channels], strides=[1, 1, 1, 1])
-        self.batch_normalization_2 = BatchNormalization(self.output_channels)
-        self.conv2 = Conv([3, 3, self.output_channels, self.output_channels], strides=[1, stride, stride, 1])
+    """
+    residual block proposed by https://arxiv.org/pdf/1603.05027.pdf
+    tensorflow version=r1.4
 
-        self._conv = Conv([1, 1, self.input_channels, self.output_channels], strides=[1, stride, stride, 1])
+    """
+    def __init__(self, kernel_size=3):
+        """
+        :param kernel_size: kernel size of second conv2d
+        """
+        self.kernel_size = kernel_size
 
-    def f_prop(self, x):
+    def f_prop(self, _input, input_channels, output_channels=None, scope="residual_block", is_training=True):
         """
         forward propagation
-        :param x: input x
+        :param _input: A Tensor
+        :param input_channels: dimension of input channel.
+        :param output_channels: dimension of output channel. input_channel -> output_channel
+        :param stride: int stride of kernel
+        :param scope: str, tensorflow name scope
+        :param is_training: boolean, whether training step or not(test step)
         :return: output residual block
         """
+        if output_channels is None:
+            output_channels = input_channels
 
-        # batch normalization & ReLU
-        batch_normed_output = self.batch_normalization.f_prop(x)
+        with tf.variable_scope(scope):
+            # batch normalization & ReLU TODO(this function should be updated when the TF version changes)
+            x = self.batch_norm(_input, input_channels, is_training)
 
-        # convolution1: change channels
-        output_conv1 = self.conv1.f_prop(batch_normed_output)
+            x = tf.layers.conv2d(x, filters=output_channels, kernel_size=1, padding='SAME', name="conv1")
 
-        # batch normalization & ReLU
-        batch_normed_output = self.batch_normalization_2.f_prop(output_conv1)
+            # batch normalization & ReLU TODO(this function should be updated when the TF version changes)
+            x = self.batch_norm(x, output_channels, is_training)
 
-        # convolution2
-        output_conv2 = self.conv2.f_prop(batch_normed_output)
+            x = tf.layers.conv2d(x, filters=output_channels, kernel_size=self.kernel_size,
+                                 strides=1, padding='SAME', name="conv2")
 
-        if (self.input_channels != self.output_channels) or (self.stride!=1):
-            input_layer = self._conv.f_prop(x)
-        else:
-            input_layer = x
+            # update input
+            if input_channels != output_channels:
+                _input = tf.layers.conv2d(_input, filters=output_channels, kernel_size=1, strides=1)
 
-        res = output_conv2 + input_layer
-        return res
+            output = x + _input
+
+            return output
+
+    @staticmethod
+    def batch_norm(x, n_out, is_training=True):
+        """
+        Batch normalization on convolutional maps.
+        Ref.: http://stackoverflow.com/questions/33949786/how-could-i-use-batch-normalization-in-tensorflow
+        Args:
+            x:           Tensor, 4D BHWD input maps
+            n_out:       integer, depth of input maps
+            is_training: boolean tf.Varialbe, true indicates training phase
+            scope:       string, variable scope
+        Return:
+            normed:      batch-normalized maps
+        """
+        with tf.variable_scope('batch_norm'):
+            beta = tf.Variable(tf.constant(0.0, shape=[n_out]),
+                               name='beta', trainable=True)
+            gamma = tf.Variable(tf.constant(1.0, shape=[n_out]),
+                                name='gamma', trainable=True)
+            batch_mean, batch_var = tf.nn.moments(x, [0, 1, 2], name='moments')
+            ema = tf.train.ExponentialMovingAverage(decay=0.5)
+
+            def mean_var_with_update():
+                ema_apply_op = ema.apply([batch_mean, batch_var])
+                with tf.control_dependencies([ema_apply_op]):
+                    return tf.identity(batch_mean), tf.identity(batch_var)
+
+            mean, var = tf.cond(tf.cast(is_training, tf.bool),
+                                mean_var_with_update,
+                                lambda: (ema.average(batch_mean), ema.average(batch_var)))
+            normed = tf.nn.batch_normalization(x, mean, var, beta, gamma, 1e-3)
+        return tf.nn.relu(normed)
+
+
