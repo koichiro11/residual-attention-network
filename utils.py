@@ -9,21 +9,21 @@ from sklearn.model_selection import train_test_split
 from keras.datasets import cifar10
 from hyperparameter import HyperParams as hp
 
-def data_load():
+def load_data():
     if hp.target_dataset == "CIFAR-10":
-        if os.path.exists(hp.DATASET_PATH + hp.target_dataset):
+        if os.path.exists(hp.DATASET_DIR + hp.target_dataset):
             print("load data from pickle")
-            with open(hp.DATASET_PATH + hp.target_dataset + "/train_X.pkl", 'rb') as f:
+            with open(hp.DATASET_DIR + hp.target_dataset + "/train_X.pkl", 'rb') as f:
                 train_X = pickle.load(f)
-            with open(hp.DATASET_PATH + hp.target_dataset + "/train_y.pkl", 'rb') as f:
+            with open(hp.DATASET_DIR + hp.target_dataset + "/train_y.pkl", 'rb') as f:
                 train_y = pickle.load(f)
-            with open(hp.DATASET_PATH + hp.target_dataset + "/valid_X.pkl", 'rb') as f:
+            with open(hp.DATASET_DIR + hp.target_dataset + "/valid_X.pkl", 'rb') as f:
                 valid_X = pickle.load(f)
-            with open(hp.DATASET_PATH + hp.target_dataset + "/valid_y.pkl", 'rb') as f:
+            with open(hp.DATASET_DIR + hp.target_dataset + "/valid_y.pkl", 'rb') as f:
                 valid_y = pickle.load(f)
-            with open(hp.DATASET_PATH + hp.target_dataset + "/test_X.pkl", 'rb') as f:
+            with open(hp.DATASET_DIR + hp.target_dataset + "/test_X.pkl", 'rb') as f:
                 test_X = pickle.load(f)
-            with open(hp.DATASET_PATH + hp.target_dataset + "/test_y.pkl", 'rb') as f:
+            with open(hp.DATASET_DIR + hp.target_dataset + "/test_y.pkl", 'rb') as f:
                 test_y = pickle.load(f)
         else:
             (cifar_X_1, cifar_y_1), (cifar_X_2, cifar_y_2) = cifar10.load_data()
@@ -38,18 +38,18 @@ def data_load():
             train_X, valid_X, train_y, valid_y = train_test_split(train_X, train_y, test_size=5000,
                                                                   random_state=hp.random_state)
 
-            os.mkdir(hp.DATASET_PATH + hp.target_dataset)
-            with open(hp.DATASET_PATH + hp.target_dataset + "/train_X.pkl", 'wb') as f1:
+            os.mkdir(hp.DATASET_DIR + hp.target_dataset)
+            with open(hp.DATASET_DIR + hp.target_dataset + "/train_X.pkl", 'wb') as f1:
                 pickle.dump(train_X, f1)
-            with open(hp.DATASET_PATH + hp.target_dataset + "/train_y.pkl", 'wb') as f1:
+            with open(hp.DATASET_DIR + hp.target_dataset + "/train_y.pkl", 'wb') as f1:
                 pickle.dump(train_y, f1)
-            with open(hp.DATASET_PATH + hp.target_dataset + "/valid_X.pkl", 'wb') as f1:
+            with open(hp.DATASET_DIR + hp.target_dataset + "/valid_X.pkl", 'wb') as f1:
                 pickle.dump(valid_X, f1)
-            with open(hp.DATASET_PATH + hp.target_dataset + "/valid_y.pkl", 'wb') as f1:
+            with open(hp.DATASET_DIR + hp.target_dataset + "/valid_y.pkl", 'wb') as f1:
                 pickle.dump(valid_y, f1)
-            with open(hp.DATASET_PATH + hp.target_dataset + "/test_X.pkl", 'wb') as f1:
+            with open(hp.DATASET_DIR + hp.target_dataset + "/test_X.pkl", 'wb') as f1:
                 pickle.dump(test_X, f1)
-            with open(hp.DATASET_PATH + hp.target_dataset + "/test_y.pkl", 'wb') as f1:
+            with open(hp.DATASET_DIR + hp.target_dataset + "/test_y.pkl", 'wb') as f1:
                 pickle.dump(test_y, f1)
 
     return train_X, train_y, valid_X, valid_y, test_X, test_y
