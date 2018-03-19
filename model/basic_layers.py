@@ -72,16 +72,16 @@ class ResidualBlock(object):
             output_channels = input_channels
 
         with tf.variable_scope(scope):
-
             # batch normalization & ReLU TODO(this function should be updated when the TF version changes)
             x = self.batch_norm(_input, input_channels, is_training)
 
-            x = tf.layers.conv2d(x, filters=output_channels, kernel_size=1, padding='SAME')
+            x = tf.layers.conv2d(x, filters=output_channels, kernel_size=1, padding='SAME', name="conv1")
 
             # batch normalization & ReLU TODO(this function should be updated when the TF version changes)
             x = self.batch_norm(x, output_channels, is_training)
 
-            x = tf.layers.conv2d(x, filters=output_channels, kernel_size=self.kernel_size, strides=1, padding='SAME')
+            x = tf.layers.conv2d(x, filters=output_channels, kernel_size=self.kernel_size,
+                                 strides=1, padding='SAME', name="conv1")
 
             # update input
             if input_channels != output_channels:

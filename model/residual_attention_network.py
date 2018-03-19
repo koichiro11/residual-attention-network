@@ -68,10 +68,6 @@ class ResidualAttentionNetwork(object):
         x = tf.nn.max_pool(x, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding='SAME')
 
         # residual block, x-> [None, row/4, line/4, 256]
-        x = self.residual_block.f_prop(x, input_channels=256, output_channels=256, scope="residual_block_3",
-                                       is_training=is_training)
-
-        # residual block, x-> [None, row/4, line/4, 256]
         x = self.residual_block.f_prop(x, input_channels=256, output_channels=256, scope="residual_block_4",
                                        is_training=is_training)
 
