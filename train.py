@@ -3,16 +3,13 @@
 Residual Attention Network
 """
 
-import sys
-import os
 import numpy as np
-import pickle
+import time
 
 from sklearn.utils import shuffle
 from sklearn.metrics import f1_score, accuracy_score
 import tensorflow as tf
-from keras.datasets import cifar10
-
+from c import tqdm
 import utils
 from model.utils import EarlyStopping
 from model.residual_attention_network import ResidualAttentionNetwork
@@ -53,7 +50,7 @@ if __name__ == "__main__":
 
             # train
             train_costs = []
-            for i in range(n_batches):
+            for i in tqdm(range(n_batches)):
                 # print(i)
                 start = i * hp.BATCH_SIZE
                 end = start + hp.BATCH_SIZE

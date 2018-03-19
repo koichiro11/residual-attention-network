@@ -81,7 +81,7 @@ class ResidualBlock(object):
             x = self.batch_norm(x, output_channels, is_training)
 
             x = tf.layers.conv2d(x, filters=output_channels, kernel_size=self.kernel_size,
-                                 strides=1, padding='SAME', name="conv1")
+                                 strides=1, padding='SAME', name="conv2")
 
             # update input
             if input_channels != output_channels:
