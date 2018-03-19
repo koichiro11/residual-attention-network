@@ -79,4 +79,4 @@ if __name__ == "__main__":
 
         print("save model...")
         saver = tf.train.Saver()
-        saver.save(sess, hp.SAVE_PATH, global_step=epoch)
+        saver.save(sess, hp.SAVED_PATH, global_step=epoch)
