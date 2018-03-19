@@ -9,7 +9,7 @@ import time
 from sklearn.utils import shuffle
 from sklearn.metrics import f1_score, accuracy_score
 import tensorflow as tf
-from c import tqdm
+from tqdm import tqdm
 import utils
 from model.utils import EarlyStopping
 from model.residual_attention_network import ResidualAttentionNetwork
