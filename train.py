@@ -11,7 +11,7 @@ import joblib
 from model.utils import EarlyStopping
 from model.residual_attention_network import ResidualAttentionNetwork
 
-from preprocessor import PreProcessorWithAugmentation
+from preprocessor import PreProcessorWithAugmentation as Preprocess
 from sklearn.utils import shuffle
 from sklearn.metrics import f1_score, accuracy_score
 import tensorflow as tf
@@ -25,7 +25,7 @@ if __name__ == "__main__":
     info = joblib.load(hp.SAVE_DIR / 'info.pkl')
 
     print("define preprocessor...")
-    preprocess = PreProcessorWithAugmentation()
+    preprocess = Preprocess()
 
     # load dataset
     print("load TFRecord...")
