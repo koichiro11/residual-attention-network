@@ -1,3 +1,8 @@
+# -*- coding: utf-8 -*-
+"""
+HyperParameter class
+"""
+from pathlib import Path
 import os
 
 class HyperParams:
@@ -5,13 +10,19 @@ class HyperParams:
     # data path
     HOME_DIR = os.environ['HOME'] + '/residual-attention-network/'
     DATASET_DIR = HOME_DIR + "/dataset/"
-    SAVED_PATH = HOME_DIR + "trained_models/model.ckpt"
+    os.makedirs(str(DATASET_DIR), exist_ok=True)
+
+    name = 'cifar-10'
+    output_dims = 10
+    DATA_DIR = Path('/datadrive') / name
+    IMAGE_DIR = DATA_DIR / 'original'
+    SAVE_DIR = DATA_DIR / 'record'
 
     # dataset
     target_dataset = "CIFAR-10"
 
     # setting
-    RANDOM_STATE = 42
+    RANDOM_STATE = 1234
     NUM_EPOCHS = 10000
     BATCH_SIZE = 64
     VALID_BATCH_SIZE = 100
