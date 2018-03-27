@@ -58,9 +58,7 @@ if __name__ == "__main__":
         train_dataset, batch_size=hp.VALID_BATCH_SIZE, num_epochs=hp.NUM_EPOCHS, buffer_size=100 * hp.VALID_BATCH_SIZE,
         aug_kwargs=aug_kwargs_valid)
 
-    valid_iterator = preprocess.get_iterator(
-        train_dataset, batch_size=hp.VALID_BATCH_SIZE, num_epochs=hp.NUM_EPOCHS, buffer_size=100 * hp.VALID_BATCH_SIZE,
-        aug_kwargs=aug_kwargs_valid)
+
     test_iterator = preprocess.get_iterator(
         test_dataset, batch_size=hp.VALID_BATCH_SIZE, num_epochs=hp.NUM_EPOCHS, buffer_size=100 * hp.VALID_BATCH_SIZE,
         aug_kwargs=aug_kwargs_valid)
