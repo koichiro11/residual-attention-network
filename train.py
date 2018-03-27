@@ -4,15 +4,11 @@ Residual Attention Network
 """
 
 import numpy as np
-import time
-from pathlib import Path
-import utils
 import joblib
 from model.utils import EarlyStopping
 from model.residual_attention_network import ResidualAttentionNetwork
 
 from preprocessor import PreProcessorWithAugmentation as Preprocess
-from sklearn.utils import shuffle
 from sklearn.metrics import f1_score, accuracy_score
 import tensorflow as tf
 from tqdm import tqdm
