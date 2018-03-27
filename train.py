@@ -29,9 +29,9 @@ if __name__ == "__main__":
 
     # load dataset
     print("load TFRecord...")
-    train_path = hp.SAVE_DIR / 'train*.tfrecord'
-    valid_path = hp.SAVE_DIR / 'valid*.tfrecord'
-    test_path = hp.SAVE_DIR / 'test*.tfrecord'
+    train_path = str(hp.SAVE_DIR / 'train*.tfrecord')
+    valid_path = str(hp.SAVE_DIR / 'valid*.tfrecord')
+    test_path = str(hp.SAVE_DIR / 'test*.tfrecord')
     image_size = info['image_size']
     train_dataset = preprocess.load_tfrecords_dataset(train_path, image_size, 10)
     valid_dataset = preprocess.load_tfrecords_dataset(train_path, image_size, 10)
