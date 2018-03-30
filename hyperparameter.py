@@ -23,6 +23,6 @@ class HyperParams:
 
     # setting
     RANDOM_STATE = 1234
-    NUM_EPOCHS = 10000
+    NUM_EPOCHS = 300
     BATCH_SIZE = 64
     VALID_BATCH_SIZE = 100

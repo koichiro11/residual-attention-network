@@ -5,14 +5,15 @@ Residual Attention Network
 
 import numpy as np
 import joblib
-from model.utils import EarlyStopping
-from model.residual_attention_network import ResidualAttentionNetwork
+import pickle
 
-from preprocessor import PreProcessorWithAugmentation as Preprocess
 from sklearn.metrics import f1_score, accuracy_score
 import tensorflow as tf
 from tqdm import tqdm
 
+from model.utils import EarlyStopping
+from model.residual_attention_network import ResidualAttentionNetwork
+from preprocessor import PreProcessorWithAugmentation as Preprocess
 from hyperparameter import HyperParams as hp
 
 
@@ -81,40 +82,75 @@ if __name__ == "__main__":
     train = tf.train.AdamOptimizer(1e-3).minimize(tf.reduce_mean(loss))
     valid = tf.argmax(y, 1)
 
-    print("start to train...")
     with tf.Session() as sess:
+        print("start to train...")
+        train_costs = []
+        valid_costs = []
         init = tf.global_variables_initializer()
         sess.run(init)
         for epoch in range(hp.NUM_EPOCHS):
             n_batches = info["data_size"]["train"] // hp.BATCH_SIZE
             # train
-            train_costs = []
+            _train_costs = []
             for i in tqdm(range(n_batches)):
                 train_X_mb, train_y_mb = sess.run(train_batch)
                 _, _loss = sess.run([train, loss], feed_dict={x: train_X_mb, t: train_y_mb, is_training: True})
-                train_costs.append(_loss)
+                _train_costs.append(_loss)
 
             # valid
-            valid_costs = []
+            _valid_costs = []
             valid_predictions = []
             valid_label = []
             n_batches = info["data_size"]["valid"] // hp.VALID_BATCH_SIZE
             for i in range(n_batches):
                 valid_X_mb, valid_y_mb = sess.run(valid_batch)
-                pred, valid_cost = sess.run([valid, loss], feed_dict={x: valid_X_mb, t: valid_y_mb, is_training: False})
+                pred, _valid_cost = sess.run([valid, loss], feed_dict={x: valid_X_mb, t: valid_y_mb, is_training: False})
                 valid_predictions.extend(pred)
                 valid_label.extend(np.argmax(valid_y_mb, 1).astype('int32'))
-                valid_costs.append(valid_cost)
+                _valid_costs.append(_valid_cost)
 
             # f1_score = f1_score(np.argmax(valid_y, 1).astype('int32'), valid_predictions, average='macro')
             accuracy = accuracy_score(valid_label, valid_predictions)
             if epoch % 5 == 0:
                 print('EPOCH: {epoch}, Training cost: {train_cost}, Validation cost: {valid_cost}, Validation Accuracy: {accuracy} '
-                      .format(epoch=epoch, train_cost=np.mean(train_costs), valid_cost=np.mean(valid_costs), accuracy=accuracy))
+                      .format(epoch=epoch, train_cost=np.mean(_train_costs), valid_cost=np.mean(_valid_costs), accuracy=accuracy))
 
-            if early_stopping.check(np.mean(valid_costs)):
+            train_costs.append(np.mean(_train_costs))
+            valid_costs.append(np.mean(_valid_costs))
+            if early_stopping.check(np.mean(_valid_costs)):
                 break
 
         print("save model...")
         saver = tf.train.Saver()
         saver.save(sess, hp.DATASET_DIR / 'model.ckpt', global_step=epoch)
+
+        print("start to eval...")
+        valid_costs = []
+        test_predictions = []
+        test_label = []
+        n_batches = info["data_size"]["test"] // hp.VALID_BATCH_SIZE
+        for i in range(n_batches):
+            test_X_mb, test_y_mb = sess.run(test_batch)
+            pred = sess.run(valid, feed_dict={x: test_X_mb, t: test_y_mb, is_training: False})
+            test_predictions.extend(pred)
+            test_label.extend(np.argmax(test_y_mb, 1).astype('int32'))
+
+        test_accuracy = accuracy_score(test_label, test_predictions)
+
+    print("save result...")
+    # training costs
+    train_costs_path = hp.SAVE_DIR / "train_costs.pkl"
+    with open(train_costs_path, mode='wb') as f:
+        pickle.dump(train_costs, f)
+
+    # validation costs
+    valid_costs_path = hp.SAVE_DIR / "valid_costs.pkl"
+    with open(valid_costs_path, mode='wb') as f:
+        pickle.dump(valid_costs, f)
+
+        # training costs
+    accuracy_path = hp.SAVE_DIR / "accuracy.pkl"
+    with open(accuracy_path, mode='wb') as f:
+        pickle.dump(accuracy, f)
+
+    print("done")
