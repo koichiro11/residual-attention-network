@@ -122,7 +122,7 @@ if __name__ == "__main__":
 
         print("save model...")
         saver = tf.train.Saver()
-        saver.save(sess, hp.DATASET_DIR / 'model.ckpt', global_step=epoch)
+        saver.save(sess, str(hp.DATASET_DIR / 'model.ckpt'), global_step=epoch)
 
         print("start to eval...")
         valid_costs = []
