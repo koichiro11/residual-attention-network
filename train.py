@@ -122,7 +122,8 @@ if __name__ == "__main__":
 
         print("save model...")
         saver = tf.train.Saver()
-        saver.save(sess, str(hp.DATASET_DIR / 'model.ckpt'), global_step=epoch)
+        save_path = hp.DATASET_DIR / 'model.ckpt'
+        saver.save(sess, str(save_path), global_step=epoch)
 
         print("start to eval...")
         valid_costs = []
@@ -136,6 +137,7 @@ if __name__ == "__main__":
             test_label.extend(np.argmax(test_y_mb, 1).astype('int32'))
 
         test_accuracy = accuracy_score(test_label, test_predictions)
+        print("accuracy score: %f" % test_accuracy)
 
     print("save result...")
     # training costs
