@@ -14,7 +14,7 @@ from tqdm import tqdm
 from model.utils import EarlyStopping
 from model.residual_attention_network import ResidualAttentionNetwork
 from preprocessor import PreProcessorWithAugmentation as Preprocess
-from hyperparameter import HyperParams as hp
+from hyperparameter_residual_attention import HyperParams as hp
 
 
 if __name__ == "__main__":

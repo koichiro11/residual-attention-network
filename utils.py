@@ -7,7 +7,7 @@ import pickle
 import numpy as np
 from sklearn.model_selection import train_test_split
 from keras.datasets import cifar10
-from hyperparameter import HyperParams as hp
+from hyperparameter_residual_attention import HyperParams as hp
 
 def load_data():
     if hp.target_dataset == "CIFAR-10":
