@@ -95,7 +95,7 @@ if __name__ == "__main__":
             # train
             start_time = time.time()
             _train_costs = []
-            for i in tqdm(range(n_batches)):
+            for i in range(n_batches):
                 train_X_mb, train_y_mb = sess.run(train_batch)
                 _, _loss = sess.run([train, loss], feed_dict={x: train_X_mb, t: train_y_mb, is_training: True})
                 _train_costs.append(_loss)
