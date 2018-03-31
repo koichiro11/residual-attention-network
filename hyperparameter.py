@@ -8,8 +8,8 @@ import os
 class HyperParams:
     """Hyper-Parameters"""
     # data path
-    HOME_DIR = Path(os.environ['HOME']) / 'residual-attention-network/'
-    DATASET_DIR = HOME_DIR / "/dataset/"
+    HOME_DIR = Path(os.environ['HOME']) / 'residual-attention-network'
+    DATASET_DIR = HOME_DIR / "dataset"
     os.makedirs(str(DATASET_DIR), exist_ok=True)
 
     name = 'cifar-10'
