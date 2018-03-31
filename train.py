@@ -131,7 +131,6 @@ if __name__ == "__main__":
         saver.save(sess, str(save_path), global_step=epoch)
 
         print("start to eval...")
-        valid_costs = []
         test_predictions = []
         test_label = []
         n_batches = info["data_size"]["test"] // hp.VALID_BATCH_SIZE
