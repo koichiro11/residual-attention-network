@@ -8,8 +8,8 @@ import os
 class HyperParams:
     """Hyper-Parameters"""
     # data path
-    HOME_DIR = os.environ['HOME'] + '/residual-attention-network/'
-    DATASET_DIR = HOME_DIR + "/dataset/"
+    HOME_DIR = Path(os.environ['HOME']) / 'residual-attention-network/'
+    DATASET_DIR = HOME_DIR / "/dataset/"
     os.makedirs(str(DATASET_DIR), exist_ok=True)
 
     name = 'cifar-10'
@@ -23,6 +23,6 @@ class HyperParams:
 
     # setting
     RANDOM_STATE = 1234
-    NUM_EPOCHS = 10
+    NUM_EPOCHS = 5
     BATCH_SIZE = 64
     VALID_BATCH_SIZE = 100
