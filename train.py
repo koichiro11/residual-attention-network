@@ -6,6 +6,7 @@ Residual Attention Network
 import numpy as np
 import joblib
 import pickle
+import time
 
 from sklearn.metrics import f1_score, accuracy_score
 import tensorflow as tf
@@ -86,16 +87,20 @@ if __name__ == "__main__":
         print("start to train...")
         train_costs = []
         valid_costs = []
+        elapsed_times = []
         init = tf.global_variables_initializer()
         sess.run(init)
         for epoch in range(hp.NUM_EPOCHS):
             n_batches = info["data_size"]["train"] // hp.BATCH_SIZE
             # train
+            start_time = time.time()
             _train_costs = []
             for i in tqdm(range(n_batches)):
                 train_X_mb, train_y_mb = sess.run(train_batch)
                 _, _loss = sess.run([train, loss], feed_dict={x: train_X_mb, t: train_y_mb, is_training: True})
                 _train_costs.append(_loss)
+            elapsed_time = time.time() - start_time
+            elapsed_times.append(elapsed_time)
 
             # valid
             _valid_costs = []
@@ -140,6 +145,11 @@ if __name__ == "__main__":
         print("accuracy score: %f" % test_accuracy)
 
     print("save result...")
+    # training time per epoch
+    train_time_path = hp.SAVE_DIR / "train_time.pkl"
+    with open(train_time_path, mode='wb') as f:
+        pickle.dump(np.mean(elapsed_times), f)
+
     # training costs
     train_costs_path = hp.SAVE_DIR / "train_costs.pkl"
     with open(train_costs_path, mode='wb') as f:
