@@ -100,7 +100,7 @@ def main():
         elapsed_times = []
         if is_restore:
             save_path = hp.DATASET_DIR / 'model.ckpt'
-            saver.restore(sess, save_path)
+            saver.restore(sess, str(save_path))
         else:
             init = tf.global_variables_initializer()
             sess.run(init)
