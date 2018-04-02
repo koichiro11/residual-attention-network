@@ -146,7 +146,7 @@ def main():
         print("save model...")
         saver = tf.train.Saver()
         save_path = hp.DATASET_DIR / 'model.ckpt'
-        saver.save(sess, str(save_path), global_step=epoch)
+        saver.save(sess, str(save_path))
 
         print("start to eval...")
         test_predictions = []
@@ -163,22 +163,27 @@ def main():
 
     print("save result...")
     # training time per epoch
-    train_time_path = hp.SAVE_DIR / "train_time.pkl"
+    if is_restore:
+        num = 2
+    else:
+        num = 1
+
+    train_time_path = hp.SAVE_DIR / "train_time_{num}.pkl".format(num=num)
     with open(train_time_path, mode='wb') as f:
         pickle.dump(np.mean(elapsed_times), f)
 
     # training costs
-    train_costs_path = hp.SAVE_DIR / "train_costs.pkl"
+    train_costs_path = hp.SAVE_DIR / "train_costs_{num}.pkl".format(num=num)
     with open(train_costs_path, mode='wb') as f:
         pickle.dump(train_costs, f)
 
     # validation costs
-    valid_costs_path = hp.SAVE_DIR / "valid_costs.pkl"
+    valid_costs_path = hp.SAVE_DIR / "valid_costs_{num}.pkl".format(num=num)
     with open(valid_costs_path, mode='wb') as f:
         pickle.dump(valid_costs, f)
 
         # training costs
-    accuracy_path = hp.SAVE_DIR / "accuracy.pkl"
+    accuracy_path = hp.SAVE_DIR / "accuracy_{num}.pkl".format(num=num)
     with open(accuracy_path, mode='wb') as f:
         pickle.dump(accuracy, f)
 
