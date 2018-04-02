@@ -3,6 +3,7 @@
 Residual Attention Network
 """
 
+import argparse
 import numpy as np
 import joblib
 import pickle
@@ -10,7 +11,6 @@ import time
 
 from sklearn.metrics import f1_score, accuracy_score
 import tensorflow as tf
-from tqdm import tqdm
 
 from model.utils import EarlyStopping
 from model.residual_attention_network import ResidualAttentionNetwork
@@ -18,8 +18,18 @@ from preprocessor import PreProcessorWithAugmentation as Preprocess
 from hyperparameter_residual_attention import HyperParams as hp
 
 
-if __name__ == "__main__":
-    print("start to train ResidualAttentionModel.")
+def main():
+    # get parameter
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--lr', type=float, default=hp.LR)
+    parser.add_argument('--num_epoch', type=int, default=hp.NUM_EPOCHS)
+    parser.add_argument('--restore', action='store_true',
+                        help='restore model')
+    args = parser.parse_args()
+    learning_rate = args.lr
+    num_epoch = args.num_epoch
+    is_restore = args.restore
+
     info = joblib.load(hp.SAVE_DIR / 'info.pkl')
 
     print("define preprocessor...")
@@ -32,7 +42,7 @@ if __name__ == "__main__":
     test_path = str(hp.SAVE_DIR / 'test*.tfrecord')
     image_size = info['image_size']
     train_dataset = preprocess.load_tfrecords_dataset(train_path, image_size, 10)
-    valid_dataset = preprocess.load_tfrecords_dataset(train_path, image_size, 10)
+    valid_dataset = preprocess.load_tfrecords_dataset(valid_path, image_size, 10)
     test_dataset = preprocess.load_tfrecords_dataset(test_path, image_size, 10)
 
     # get iterator
@@ -46,7 +56,7 @@ if __name__ == "__main__":
         'is_training': True,
     }
     train_iterator = preprocess.get_iterator(
-        train_dataset, batch_size=hp.BATCH_SIZE, num_epochs=hp.NUM_EPOCHS, buffer_size=100 * hp.BATCH_SIZE,
+        train_dataset, batch_size=hp.BATCH_SIZE, num_epochs=num_epoch, buffer_size=100 * hp.BATCH_SIZE,
         aug_kwargs=aug_kwargs_train)
     aug_kwargs_valid = {
         'resize_h': 40,
@@ -57,12 +67,11 @@ if __name__ == "__main__":
         'is_training': False,
     }
     valid_iterator = preprocess.get_iterator(
-        train_dataset, batch_size=hp.VALID_BATCH_SIZE, num_epochs=hp.NUM_EPOCHS, buffer_size=100 * hp.VALID_BATCH_SIZE,
+        valid_dataset, batch_size=hp.VALID_BATCH_SIZE, num_epochs=num_epoch, buffer_size=100 * hp.VALID_BATCH_SIZE,
         aug_kwargs=aug_kwargs_valid)
 
-
     test_iterator = preprocess.get_iterator(
-        test_dataset, batch_size=hp.VALID_BATCH_SIZE, num_epochs=hp.NUM_EPOCHS, buffer_size=100 * hp.VALID_BATCH_SIZE,
+        test_dataset, batch_size=hp.VALID_BATCH_SIZE, num_epochs=num_epoch, buffer_size=100 * hp.VALID_BATCH_SIZE,
         aug_kwargs=aug_kwargs_valid)
     train_batch = train_iterator.get_next()
     valid_batch = valid_iterator.get_next()
@@ -79,18 +88,24 @@ if __name__ == "__main__":
     y = model.f_prop(x)
 
     # loss = tf.nn.softmax_cross_entropy_with_logits(logits=y, labels=t)
-    loss = tf.reduce_mean(-tf.reduce_sum(t * tf.log(y+1e-7), reduction_indices=[1]))
-    train = tf.train.AdamOptimizer(1e-3).minimize(tf.reduce_mean(loss))
+    loss = tf.reduce_mean(-tf.reduce_sum(t * tf.log(y + 1e-7), reduction_indices=[1]))
+    train = tf.train.AdamOptimizer(learning_rate).minimize(tf.reduce_mean(loss))
     valid = tf.argmax(y, 1)
+    saver = tf.train.Saver()
 
     with tf.Session() as sess:
         print("start to train...")
         train_costs = []
         valid_costs = []
         elapsed_times = []
-        init = tf.global_variables_initializer()
-        sess.run(init)
-        for epoch in range(hp.NUM_EPOCHS):
+        if is_restore:
+            save_path = hp.DATASET_DIR / 'model.ckpt'
+            saver.restore(sess, save_path)
+        else:
+            init = tf.global_variables_initializer()
+            sess.run(init)
+
+        for epoch in range(num_epoch):
             n_batches = info["data_size"]["train"] // hp.BATCH_SIZE
             # train
             start_time = time.time()
@@ -109,7 +124,8 @@ if __name__ == "__main__":
             n_batches = info["data_size"]["valid"] // hp.VALID_BATCH_SIZE
             for i in range(n_batches):
                 valid_X_mb, valid_y_mb = sess.run(valid_batch)
-                pred, _valid_cost = sess.run([valid, loss], feed_dict={x: valid_X_mb, t: valid_y_mb, is_training: False})
+                pred, _valid_cost = sess.run([valid, loss],
+                                             feed_dict={x: valid_X_mb, t: valid_y_mb, is_training: False})
                 valid_predictions.extend(pred)
                 valid_label.extend(np.argmax(valid_y_mb, 1).astype('int32'))
                 _valid_costs.append(_valid_cost)
@@ -117,8 +133,10 @@ if __name__ == "__main__":
             # f1_score = f1_score(np.argmax(valid_y, 1).astype('int32'), valid_predictions, average='macro')
             accuracy = accuracy_score(valid_label, valid_predictions)
             if epoch % 5 == 0:
-                print('EPOCH: {epoch}, Training cost: {train_cost}, Validation cost: {valid_cost}, Validation Accuracy: {accuracy} '
-                      .format(epoch=epoch, train_cost=np.mean(_train_costs), valid_cost=np.mean(_valid_costs), accuracy=accuracy))
+                print(
+                    'EPOCH: {epoch}, Training cost: {train_cost}, Validation cost: {valid_cost}, Validation Accuracy: {accuracy} '
+                    .format(epoch=epoch, train_cost=np.mean(_train_costs), valid_cost=np.mean(_valid_costs),
+                            accuracy=accuracy))
 
             train_costs.append(np.mean(_train_costs))
             valid_costs.append(np.mean(_valid_costs))
@@ -164,4 +182,8 @@ if __name__ == "__main__":
     with open(accuracy_path, mode='wb') as f:
         pickle.dump(accuracy, f)
 
+
+if __name__ == "__main__":
+    print("start to train ResidualAttentionModel.")
+    main()
     print("done")
