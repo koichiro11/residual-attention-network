@@ -26,7 +26,7 @@ def main():
     parser.add_argument('--restore', action='store_true',
                         help='restore model')
     args = parser.parse_args()
-    learning_rate = args.lr
+    starter_learning_rate = args.lr
     num_epoch = args.num_epoch
     is_restore = args.restore
 
@@ -89,7 +89,22 @@ def main():
 
     # loss = tf.nn.softmax_cross_entropy_with_logits(logits=y, labels=t)
     loss = tf.reduce_mean(-tf.reduce_sum(t * tf.log(y + 1e-7), reduction_indices=[1]))
-    train = tf.train.AdamOptimizer(learning_rate).minimize(tf.reduce_mean(loss))
+    global_step = tf.Variable(0, trainable=False)
+
+    __learning_rate = tf.train.exponential_decay(starter_learning_rate, global_step,
+                                               1, 0.9999, staircase=False)
+
+    _learning_rate = tf.train.exponential_decay(__learning_rate, global_step,
+                                               64000, 0.1, staircase=True)
+
+    learning_rate = tf.train.exponential_decay(_learning_rate, global_step,
+                                                96000, 0.1, staircase=True)
+
+    train = (
+        tf.train.MomentumOptimizer(learning_rate, 0.9)
+            .minimize(loss, global_step = global_step)
+    )
+    # train = tf.train.AdamOptimizer(learning_rate).minimize(tf.reduce_mean(loss))
     valid = tf.argmax(y, 1)
     saver = tf.train.Saver()
 
@@ -140,8 +155,8 @@ def main():
 
             train_costs.append(np.mean(_train_costs))
             valid_costs.append(np.mean(_valid_costs))
-            if early_stopping.check(np.mean(_valid_costs)):
-                break
+            #if early_stopping.check(np.mean(_valid_costs)):
+            #    break
 
         print("save model...")
         saver = tf.train.Saver()
