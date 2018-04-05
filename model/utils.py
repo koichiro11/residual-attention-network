@@ -23,3 +23,16 @@ class EarlyStopping(object):
             return True
         else:
             return False
+
+
+def loss_filter(name):
+    """
+    select tensorflow variable for l2 regularization
+    :param name:
+    :return:
+    """
+    ng_scopes = ['batch_norm', 'bias']
+    for ng_scope in ng_scopes:
+        if ng_scope in name:
+            return False
+    return True

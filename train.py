@@ -12,7 +12,7 @@ import time
 from sklearn.metrics import f1_score, accuracy_score
 import tensorflow as tf
 
-from model.utils import EarlyStopping
+from model.utils import EarlyStopping, loss_filter
 from model.residual_attention_network import ResidualAttentionNetwork
 from preprocessor import PreProcessorWithAugmentation as Preprocess
 from hyperparameter_residual_attention import HyperParams as hp
@@ -25,10 +25,14 @@ def main():
     parser.add_argument('--num_epoch', type=int, default=hp.NUM_EPOCHS)
     parser.add_argument('--restore', action='store_true',
                         help='restore model')
+    parser.add_argument('--weight_decay', type=float, default=hp.WEIGHT_DECAY,
+                        help='weight decay for regularization')
+
     args = parser.parse_args()
     starter_learning_rate = args.lr
     num_epoch = args.num_epoch
     is_restore = args.restore
+    weights_decay = args.weights_decay
 
     info = joblib.load(hp.SAVE_DIR / 'info.pkl')
 
@@ -87,14 +91,14 @@ def main():
 
     y = model.f_prop(x)
 
-    # loss = tf.nn.softmax_cross_entropy_with_logits(logits=y, labels=t)
-    loss = tf.reduce_mean(-tf.reduce_sum(t * tf.log(y + 1e-7), reduction_indices=[1]))
+    cross_entropy = tf.reduce_mean(-tf.reduce_sum(t * tf.log(y + 1e-7), reduction_indices=[1]))
+    weights = [tf.nn.l2_loss(v) for v in tf.trainable_variables() if loss_filter(v.name)]
+    l2_norm = weights_decay * tf.add_n(weights)
+    loss = cross_entropy + l2_norm
+
     global_step = tf.Variable(0, trainable=False)
 
-    __learning_rate = tf.train.exponential_decay(starter_learning_rate, global_step,
-                                               1, 0.9999, staircase=False)
-
-    _learning_rate = tf.train.exponential_decay(__learning_rate, global_step,
+    _learning_rate = tf.train.exponential_decay(starter_learning_rate, global_step,
                                                64000, 0.1, staircase=True)
 
     learning_rate = tf.train.exponential_decay(_learning_rate, global_step,
@@ -102,7 +106,7 @@ def main():
 
     train = (
         tf.train.MomentumOptimizer(learning_rate, 0.9)
-            .minimize(loss, global_step = global_step)
+            .minimize(loss, global_step=global_step)
     )
     # train = tf.train.AdamOptimizer(learning_rate).minimize(tf.reduce_mean(loss))
     valid = tf.argmax(y, 1)
@@ -152,6 +156,7 @@ def main():
                     'EPOCH: {epoch}, Training cost: {train_cost}, Validation cost: {valid_cost}, Validation Accuracy: {accuracy} '
                     .format(epoch=epoch, train_cost=np.mean(_train_costs), valid_cost=np.mean(_valid_costs),
                             accuracy=accuracy))
+                print(sess.run(learning_rate))
 
             train_costs.append(np.mean(_train_costs))
             valid_costs.append(np.mean(_valid_costs))
@@ -200,7 +205,7 @@ def main():
         # training costs
     accuracy_path = hp.SAVE_DIR / "accuracy_{num}.pkl".format(num=num)
     with open(accuracy_path, mode='wb') as f:
-        pickle.dump(accuracy, f)
+        pickle.dump(test_accuracy, f)
 
 
 if __name__ == "__main__":

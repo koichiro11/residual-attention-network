@@ -23,6 +23,7 @@ class HyperParams:
 
     # setting
     LR = 1e-1
+    WEIGHT_DECAY = 0.0001
     RANDOM_STATE = 1234
     NUM_EPOCHS = 250
     BATCH_SIZE = 64
