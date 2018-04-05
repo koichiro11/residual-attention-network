@@ -94,7 +94,8 @@ def main():
     cross_entropy = tf.reduce_mean(-tf.reduce_sum(t * tf.log(y + 1e-7), reduction_indices=[1]))
     weights = [tf.nn.l2_loss(v) for v in tf.trainable_variables() if loss_filter(v.name)]
     l2_norm = weights_decay * tf.add_n(weights)
-    loss = cross_entropy + l2_norm
+    # loss = cross_entropy + l2_norm
+    loss = cross_entropy
 
     global_step = tf.Variable(0, trainable=False)
 
@@ -156,7 +157,6 @@ def main():
                     'EPOCH: {epoch}, Training cost: {train_cost}, Validation cost: {valid_cost}, Validation Accuracy: {accuracy} '
                     .format(epoch=epoch, train_cost=np.mean(_train_costs), valid_cost=np.mean(_valid_costs),
                             accuracy=accuracy))
-                print(sess.run(learning_rate))
 
             train_costs.append(np.mean(_train_costs))
             valid_costs.append(np.mean(_valid_costs))
