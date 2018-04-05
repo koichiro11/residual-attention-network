@@ -23,9 +23,9 @@ class ResidualAttentionNetwork(object):
         self.input_shape = [-1, 32, 32, 3]
         self.output_dim = 10
 
-        self.attention_module_1 = AttentionModule1(scope="attention_module_1")
+        self.attention_module_1 = AttentionModule2(scope="attention_module_1")
         self.attention_module_2 = AttentionModule2(scope="attention_module_2")
-        self.attention_module_3 = AttentionModule3(scope="attention_module_3")
+        self.attention_module_3 = AttentionModule2(scope="attention_module_3")
         self.residual_block = ResidualBlock()
 
     def f_prop(self, x, is_training=True):
@@ -43,7 +43,7 @@ class ResidualAttentionNetwork(object):
         x = tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 1, 1, 1], padding='SAME')
 
         # attention module, x -> [None, row, line, 32]
-        x = self.attention_module_2.f_prop(x, input_channels=32, is_training=is_training)
+        x = self.attention_module_1.f_prop(x, input_channels=32, is_training=is_training)
 
         # residual block, x-> [None, row, line, 64]
         x = self.residual_block.f_prop(x, input_channels=32, output_channels=64, scope="residual_block_1",
@@ -61,7 +61,7 @@ class ResidualAttentionNetwork(object):
         x = tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
         # attention module, x -> [None, row/4, line/4, 64]
-        x = self.attention_module_2.f_prop(x, input_channels=128, is_training=is_training)
+        x = self.attention_module_3.f_prop(x, input_channels=128, is_training=is_training)
 
         # residual block, x-> [None, row/4, line/4, 256]
         x = self.residual_block.f_prop(x, input_channels=128, output_channels=256, scope="residual_block_3",
