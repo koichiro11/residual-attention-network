@@ -25,7 +25,7 @@ def main():
     parser.add_argument('--num_epoch', type=int, default=hp.NUM_EPOCHS)
     parser.add_argument('--restore', action='store_true',
                         help='restore model')
-    parser.add_argument('--weight_decay', type=float, default=hp.WEIGHT_DECAY,
+    parser.add_argument('--weights_decay', type=float, default=hp.WEIGHT_DECAY,
                         help='weight decay for regularization')
 
     args = parser.parse_args()
