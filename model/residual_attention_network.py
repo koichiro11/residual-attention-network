@@ -37,13 +37,13 @@ class ResidualAttentionNetwork(object):
         # x = [None, row, line, channel]
 
         # conv, x -> [None, row, line, 32]
-        x = tf.layers.conv2d(x, filters=32, kernel_size=5, strides=1, padding='SAME')
+        x = tf.layers.conv2d(x, filters=32, kernel_size=1, strides=1, padding='SAME')
 
         # max pooling, x -> [None, row, line, 32]
-        x = tf.nn.max_pool(x, ksize=[1, 5, 5, 1], strides=[1, 1, 1, 1], padding='SAME')
+        x = tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 1, 1, 1], padding='SAME')
 
         # attention module, x -> [None, row, line, 32]
-        x = self.attention_module_1.f_prop(x, input_channels=32, is_training=is_training)
+        x = self.attention_module_2.f_prop(x, input_channels=32, is_training=is_training)
 
         # residual block, x-> [None, row, line, 64]
         x = self.residual_block.f_prop(x, input_channels=32, output_channels=64, scope="residual_block_1",
@@ -59,10 +59,9 @@ class ResidualAttentionNetwork(object):
                                        is_training=is_training)
         # max pooling, x -> [None, row/4, line/4, 128]
         x = tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
-        self.debug_1 = x
 
         # attention module, x -> [None, row/4, line/4, 64]
-        x = self.attention_module_3.f_prop(x, input_channels=128, is_training=is_training)
+        x = self.attention_module_2.f_prop(x, input_channels=128, is_training=is_training)
 
         # residual block, x-> [None, row/4, line/4, 256]
         x = self.residual_block.f_prop(x, input_channels=128, output_channels=256, scope="residual_block_3",
