@@ -9,7 +9,7 @@ from keras.layers.convolutional import UpSampling2D
 from .basic_layers import ResidualBlock
 
 
-class AttentionModuleDefault(object):
+class AttentionModule52(object):
     """AttentionModuleClass"""
     def __init__(self, p=1, t=2, r=1, scope="attention_module"):
         """
@@ -67,7 +67,7 @@ class AttentionModuleDefault(object):
             return output
 
 
-class AttentionModule1(AttentionModuleDefault):
+class AttentionModule52_1(AttentionModule52):
     """
     attention module stage 1
     """
@@ -166,7 +166,7 @@ class AttentionModule1(AttentionModuleDefault):
             return tf.nn.sigmoid(output_soft_mask)
 
 
-class AttentionModule2(AttentionModuleDefault):
+class AttentionModule52_2(AttentionModule52):
     """
     attention module stage 2
     """
@@ -236,7 +236,7 @@ class AttentionModule2(AttentionModuleDefault):
             return tf.nn.sigmoid(output_soft_mask)
 
 
-class AttentionModule3(AttentionModuleDefault):
+class AttentionModule52_3(AttentionModule52):
     """
     attention module stage 3
     """

@@ -12,7 +12,8 @@ from .attention_module import AttentionModule1, AttentionModule2, AttentionModul
 
 class ResidualAttentionNetwork(object):
     """
-    Residual Attention Network
+    Residual Attention Network for cifar-10.
+    If you would like to use anther dataset, please override this class
     URL: https://arxiv.org/abs/1704.06904
     """
     def __init__(self):

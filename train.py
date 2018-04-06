@@ -130,7 +130,7 @@ def main():
             _train_costs = []
             for i in range(n_batches):
                 train_X_mb, train_y_mb = sess.run(train_batch)
-                _, _loss = sess.run([train, loss], feed_dict={x: train_X_mb, t: train_y_mb, is_training: True})
+                _, _loss = sess.run([train, cross_entropy], feed_dict={x: train_X_mb, t: train_y_mb, is_training: True})
                 _train_costs.append(_loss)
             elapsed_time = time.time() - start_time
             elapsed_times.append(elapsed_time)
@@ -142,7 +142,7 @@ def main():
             n_batches = info["data_size"]["valid"] // hp.VALID_BATCH_SIZE
             for i in range(n_batches):
                 valid_X_mb, valid_y_mb = sess.run(valid_batch)
-                pred, _valid_cost = sess.run([valid, loss],
+                pred, _valid_cost = sess.run([valid, cross_entropy],
                                              feed_dict={x: valid_X_mb, t: valid_y_mb, is_training: False})
                 valid_predictions.extend(pred)
                 valid_label.extend(np.argmax(valid_y_mb, 1).astype('int32'))
