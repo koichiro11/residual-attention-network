@@ -184,7 +184,7 @@ class AttentionModule2(AttentionModuleDefault):
         with tf.variable_scope("soft_mask_branch"):
 
             with tf.variable_scope("down_sampling_1"):
-                # max pooling
+                # max pooling ->[batch, height/2, weight/2, channel]
                 filter_ = [1, 2, 2, 1]
                 output_soft_mask = tf.nn.max_pool(input, ksize=filter_, strides=filter_, padding='SAME')
 
@@ -198,7 +198,7 @@ class AttentionModule2(AttentionModuleDefault):
                                                                     is_training=is_training)
 
             with tf.variable_scope("down_sampling_2"):
-                # max pooling
+                # max pooling ->[batch, height/4, weight/4, channel]
                 filter_ = [1, 2, 2, 1]
                 output_soft_mask = tf.nn.max_pool(output_soft_mask, ksize=filter_, strides=filter_, padding='SAME')
 

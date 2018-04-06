@@ -16,14 +16,12 @@ class ResidualAttentionNetwork(object):
     URL: https://arxiv.org/abs/1704.06904
     """
     def __init__(self):
-        """
-        :param input_shape: the list of input shape (ex: [None, 28, 28 ,3]
-        :param output_dim:
-        """
         self.input_shape = [-1, 32, 32, 3]
         self.output_dim = 10
 
+        # for cifar-10, you should use attention module 2 for first stage
         self.attention_module_1 = AttentionModule2(scope="attention_module_1")
+        # self.attention_module_1 = AttentionModule1(scope="attention_module_1")
         self.attention_module_2 = AttentionModule2(scope="attention_module_2")
         self.attention_module_3 = AttentionModule3(scope="attention_module_3")
         self.residual_block = ResidualBlock()
