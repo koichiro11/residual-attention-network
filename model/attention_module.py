@@ -298,7 +298,7 @@ class AttentionModule52_4(AttentionModule52):
 
             with tf.variable_scope("down_sampling_1"):
                 for i in range(self.r):
-                    output_soft_mask = self.residual_block.f_prop(output_soft_mask, input_channels,
+                    output_soft_mask = self.residual_block.f_prop(input, input_channels,
                                                                   scope="num_blocks_{}".format(i),
                                                                   is_training=is_training)
 
