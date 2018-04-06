@@ -22,7 +22,7 @@ class ResidualAttentionNetwork(object):
 
         # for cifar-10, you should use attention module 2 for first stage
         self.attention_module_1 = AttentionModule52_2(scope="attention_module_1")
-        # self.attention_module_1 = AttentionModule1(scope="attention_module_1")
+        # self.attention_module_1 = AttentionModule52_1(scope="attention_module_1")
         self.attention_module_2 = AttentionModule52_2(scope="attention_module_2")
         self.attention_module_3 = AttentionModule52_3(scope="attention_module_3")
         self.residual_block = ResidualBlock()
