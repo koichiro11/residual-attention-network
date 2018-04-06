@@ -7,7 +7,7 @@ import tensorflow as tf
 import numpy as np
 
 from .basic_layers import ResidualBlock
-from .attention_module import AttentionModule1, AttentionModule2, AttentionModule3
+from .attention_module import AttentionModule52_1, AttentionModule52_2, AttentionModule52_3
 
 
 class ResidualAttentionNetwork(object):
@@ -21,10 +21,10 @@ class ResidualAttentionNetwork(object):
         self.output_dim = 10
 
         # for cifar-10, you should use attention module 2 for first stage
-        self.attention_module_1 = AttentionModule2(scope="attention_module_1")
+        self.attention_module_1 = AttentionModule52_2(scope="attention_module_1")
         # self.attention_module_1 = AttentionModule1(scope="attention_module_1")
-        self.attention_module_2 = AttentionModule2(scope="attention_module_2")
-        self.attention_module_3 = AttentionModule3(scope="attention_module_3")
+        self.attention_module_2 = AttentionModule52_2(scope="attention_module_2")
+        self.attention_module_3 = AttentionModule52_3(scope="attention_module_3")
         self.residual_block = ResidualBlock()
 
     def f_prop(self, x, is_training=True):
