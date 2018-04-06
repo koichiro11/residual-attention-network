@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 """
-Residual Attention Network
+pre-train for Residual Attention Network
 """
 
 import argparse
@@ -8,7 +8,6 @@ import numpy as np
 import joblib
 import pickle
 import time
-from datetime import date
 
 from sklearn.metrics import f1_score, accuracy_score
 import tensorflow as tf
@@ -20,27 +19,17 @@ from hyperparameter_residual_attention import HyperParams as hp
 
 
 def main():
-    """train model"""
-    today_date = date.today()
-    today_date_str = today_date.strftime('%Y-%m-%d')
-    model_name_default = "model_" + today_date_str +  ".ckpt"
     # get parameter
     parser = argparse.ArgumentParser()
     parser.add_argument('--lr', type=float, default=hp.LR)
     parser.add_argument('--num_epoch', type=int, default=hp.NUM_EPOCHS)
-    parser.add_argument('--restore', action='store_true',
-                        help='restore model')
     parser.add_argument('--weights_decay', type=float, default=hp.WEIGHT_DECAY,
                         help='weight decay for regularization')
-    parser.add_argument('--model_name', type=str, default=model_name_default,
-                        help='model name to save')
 
     args = parser.parse_args()
     starter_learning_rate = args.lr
     num_epoch = args.num_epoch
-    is_restore = args.restore
     weights_decay = args.weights_decay
-    model_name = args.model_name
 
     info = joblib.load(hp.SAVE_DIR / 'info.pkl')
 
@@ -107,15 +96,7 @@ def main():
 
     global_step = tf.Variable(0, trainable=False)
 
-    _learning_rate = tf.train.exponential_decay(starter_learning_rate, global_step,
-                                               64000, 0.1, staircase=True)
-
-    learning_rate = tf.train.exponential_decay(_learning_rate, global_step,
-                                                96000, 0.1, staircase=True)
-
-    train = tf.train.MomentumOptimizer(learning_rate, 0.9).minimize(loss, global_step=global_step)
-
-    # train = tf.train.AdamOptimizer(learning_rate).minimize(tf.reduce_mean(loss), global_step=global_step)
+    train = tf.train.AdamOptimizer(starter_learning_rate).minimize(tf.reduce_mean(loss), global_step=global_step)
     valid = tf.argmax(y, 1)
     saver = tf.train.Saver()
 
@@ -124,12 +105,9 @@ def main():
         train_costs = []
         valid_costs = []
         elapsed_times = []
-        if is_restore:
-            save_path = hp.DATASET_DIR / 'model.ckpt'
-            saver.restore(sess, str(save_path))
-        else:
-            init = tf.global_variables_initializer()
-            sess.run(init)
+
+        init = tf.global_variables_initializer()
+        sess.run(init)
 
         for epoch in range(num_epoch):
             n_batches = info["data_size"]["train"] // hp.BATCH_SIZE
@@ -166,7 +144,7 @@ def main():
 
                 print("save model...")
                 saver = tf.train.Saver()
-                save_path = hp.DATASET_DIR / model_name
+                save_path = hp.DATASET_DIR / "model.ckpt"
                 saver.save(sess, str(save_path))
 
             train_costs.append(np.mean(_train_costs))
@@ -176,7 +154,7 @@ def main():
 
         print("save model...")
         saver = tf.train.Saver()
-        save_path = hp.DATASET_DIR / model_name
+        save_path = hp.DATASET_DIR / "model.ckpt"
         saver.save(sess, str(save_path))
 
         print("start to eval...")
@@ -192,29 +170,8 @@ def main():
         test_accuracy = accuracy_score(test_label, test_predictions)
         print("accuracy score: %f" % test_accuracy)
 
-    print("save result...")
-    # training time per epoch
-    train_time_path = hp.SAVE_DIR / "train_time_{name}.pkl".format(name=model_name)
-    with open(train_time_path, mode='wb') as f:
-        pickle.dump(np.mean(elapsed_times), f)
-
-    # training costs
-    train_costs_path = hp.SAVE_DIR / "train_costs_{name}.pkl".format(name=model_name)
-    with open(train_costs_path, mode='wb') as f:
-        pickle.dump(train_costs, f)
-
-    # validation costs
-    valid_costs_path = hp.SAVE_DIR / "valid_costs_{name}.pkl".format(name=model_name)
-    with open(valid_costs_path, mode='wb') as f:
-        pickle.dump(valid_costs, f)
-
-        # training costs
-    accuracy_path = hp.SAVE_DIR / "accuracy_{name}.pkl".format(name=model_name)
-    with open(accuracy_path, mode='wb') as f:
-        pickle.dump(test_accuracy, f)
-
 
 if __name__ == "__main__":
-    print("start to train ResidualAttentionModel.")
+    print("start to pre-train ResidualAttentionModel.")
     main()
     print("done")
