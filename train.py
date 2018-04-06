@@ -127,6 +127,10 @@ def main():
         if is_restore:
             save_path = hp.DATASET_DIR / 'model.ckpt'
             saver.restore(sess, str(save_path))
+            # initialize global_step
+            init = tf.initialize_variables([global_step])
+            sess.run(init)
+
         else:
             init = tf.global_variables_initializer()
             sess.run(init)
