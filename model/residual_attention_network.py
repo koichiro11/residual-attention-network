@@ -7,7 +7,7 @@ import tensorflow as tf
 import numpy as np
 
 from .basic_layers import ResidualBlock
-from .attention_module import AttentionModule52_1, AttentionModule52_2, AttentionModule52_3
+from .attention_module import AttentionModule52_1, AttentionModule52_2, AttentionModule52_3, AttentionModule52_4
 
 
 class ResidualAttentionNetwork(object):
@@ -23,8 +23,8 @@ class ResidualAttentionNetwork(object):
         # for cifar-10, you should use attention module 2 for first stage
         self.attention_module_1 = AttentionModule52_2(scope="attention_module_1")
         # self.attention_module_1 = AttentionModule52_1(scope="attention_module_1")
-        self.attention_module_2 = AttentionModule52_2(scope="attention_module_2")
-        self.attention_module_3 = AttentionModule52_3(scope="attention_module_3")
+        self.attention_module_2 = AttentionModule52_3(scope="attention_module_2")
+        self.attention_module_3 = AttentionModule52_4(scope="attention_module_3")
         self.residual_block = ResidualBlock()
 
     def f_prop(self, x, is_training=True):
@@ -36,10 +36,10 @@ class ResidualAttentionNetwork(object):
         # x = [None, row, line, channel]
 
         # conv, x -> [None, row, line, 32]
-        x = tf.layers.conv2d(x, filters=32, kernel_size=1, strides=1, padding='SAME')
+        x = tf.layers.conv2d(x, filters=32, kernel_size=3, strides=1, padding='SAME')
 
         # max pooling, x -> [None, row, line, 32]
-        x = tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 1, 1, 1], padding='SAME')
+        x = tf.nn.max_pool(x, ksize=[1, 3, 3, 1], strides=[1, 1, 1, 1], padding='SAME')
 
         # attention module, x -> [None, row, line, 32]
         x = self.attention_module_1.f_prop(x, input_channels=32, is_training=is_training)

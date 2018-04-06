@@ -278,3 +278,39 @@ class AttentionModule52_3(AttentionModule52):
 
             # sigmoid
             return tf.nn.sigmoid(output_soft_mask)
+
+class AttentionModule52_4(AttentionModule52):
+    """
+    attention module stage 4
+    """
+    def __init__(self, p=1, t=2, r=1, scope="attention_module"):
+        super().__init__(p=p, t=t, r=r, scope=scope)
+
+    def soft_mask_branch(self, input, input_channels, is_training=True):
+        """
+        soft mask branch.
+        :param input: A Tensor. input data [batch_size, height, width, channel]
+        :param input_channels: dimension of input channel.
+        :param is_training: boolean, whether training step or not(test step)
+        :return: A Tensor [batch_size, height, width, channel]
+        """
+        with tf.variable_scope("soft_mask_branch"):
+
+            with tf.variable_scope("down_sampling_1"):
+                for i in range(self.r):
+                    output_soft_mask = self.residual_block.f_prop(output_soft_mask, input_channels,
+                                                                  scope="num_blocks_{}".format(i),
+                                                                  is_training=is_training)
+
+            with tf.variable_scope("up_sampling_1"):
+                for i in range(self.r):
+                    output_soft_mask = self.residual_block.f_prop(output_soft_mask, input_channels,
+                                                                  scope="num_blocks_{}".format(i),
+                                                                  is_training=is_training)
+
+            with tf.variable_scope("output"):
+                output_soft_mask = tf.layers.conv2d(output_soft_mask, filters=input_channels, kernel_size=1)
+                output_soft_mask = tf.layers.conv2d(output_soft_mask, filters=input_channels, kernel_size=1)
+
+            # sigmoid
+            return tf.nn.sigmoid(output_soft_mask)

@@ -107,15 +107,15 @@ def main():
 
     global_step = tf.Variable(0, trainable=False)
 
-    _learning_rate = tf.train.exponential_decay(starter_learning_rate, global_step,
-                                               64000, 0.1, staircase=True)
+    #_learning_rate = tf.train.exponential_decay(starter_learning_rate, global_step,
+    #                                           64000, 0.1, staircase=True)
 
-    learning_rate = tf.train.exponential_decay(_learning_rate, global_step,
-                                                96000, 0.1, staircase=True)
+    #learning_rate = tf.train.exponential_decay(_learning_rate, global_step,
+    #                                    96000, 0.1, staircase=True)
 
-    train = tf.train.MomentumOptimizer(learning_rate, 0.9).minimize(loss, global_step=global_step)
+    #train = tf.train.MomentumOptimizer(learning_rate, 0.9).minimize(loss, global_step=global_step)
 
-    # train = tf.train.AdamOptimizer(learning_rate).minimize(tf.reduce_mean(loss), global_step=global_step)
+    train = tf.train.AdamOptimizer(starter_learning_rate).minimize(tf.reduce_mean(loss), global_step=global_step)
     valid = tf.argmax(y, 1)
     saver = tf.train.Saver()
 
@@ -173,28 +173,50 @@ def main():
                 save_path = hp.DATASET_DIR / model_name
                 saver.save(sess, str(save_path))
 
+                print("save result...")
+                # training time per epoch
+                train_time_path = hp.SAVE_DIR / "train_time_{name}.pkl".format(name=model_name)
+                with open(train_time_path, mode='wb') as f:
+                    pickle.dump(np.mean(elapsed_times), f)
+
+                # training costs
+                train_costs_path = hp.SAVE_DIR / "train_costs_{name}.pkl".format(name=model_name)
+                with open(train_costs_path, mode='wb') as f:
+                    pickle.dump(train_costs, f)
+
+                # validation costs
+                valid_costs_path = hp.SAVE_DIR / "valid_costs_{name}.pkl".format(name=model_name)
+                with open(valid_costs_path, mode='wb') as f:
+                    pickle.dump(valid_costs, f)
+
             train_costs.append(np.mean(_train_costs))
             valid_costs.append(np.mean(_valid_costs))
             #if early_stopping.check(np.mean(_valid_costs)):
             #    break
+
+            print("start to eval...")
+            test_predictions = []
+            test_label = []
+            n_batches = info["data_size"]["test"] // hp.VALID_BATCH_SIZE
+            for i in range(n_batches):
+                test_X_mb, test_y_mb = sess.run(test_batch)
+                pred = sess.run(valid, feed_dict={x: test_X_mb, t: test_y_mb, is_training: False})
+                test_predictions.extend(pred)
+                test_label.extend(np.argmax(test_y_mb, 1).astype('int32'))
+
+            test_accuracy = accuracy_score(test_label, test_predictions)
+            print("accuracy score: %f" % test_accuracy)
+
+            # training costs
+            accuracy_path = hp.SAVE_DIR / "accuracy_{name}.pkl".format(name=model_name)
+            with open(accuracy_path, mode='wb') as f:
+                pickle.dump(test_accuracy, f)
 
         print("save model...")
         saver = tf.train.Saver()
         save_path = hp.DATASET_DIR / model_name
         saver.save(sess, str(save_path))
 
-        print("start to eval...")
-        test_predictions = []
-        test_label = []
-        n_batches = info["data_size"]["test"] // hp.VALID_BATCH_SIZE
-        for i in range(n_batches):
-            test_X_mb, test_y_mb = sess.run(test_batch)
-            pred = sess.run(valid, feed_dict={x: test_X_mb, t: test_y_mb, is_training: False})
-            test_predictions.extend(pred)
-            test_label.extend(np.argmax(test_y_mb, 1).astype('int32'))
-
-        test_accuracy = accuracy_score(test_label, test_predictions)
-        print("accuracy score: %f" % test_accuracy)
 
     print("save result...")
     # training time per epoch
@@ -212,7 +234,7 @@ def main():
     with open(valid_costs_path, mode='wb') as f:
         pickle.dump(valid_costs, f)
 
-        # training costs
+    # training costs
     accuracy_path = hp.SAVE_DIR / "accuracy_{name}.pkl".format(name=model_name)
     with open(accuracy_path, mode='wb') as f:
         pickle.dump(test_accuracy, f)
