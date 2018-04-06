@@ -58,7 +58,7 @@ class AttentionModuleDefault(object):
             output_soft_mask = self.soft_mask_branch(input, input_channels, is_training=True)
 
             with tf.variable_scope("attention"):
-                output = (1 + output_soft_mask) * output_trunk
+                output = (1.0 + output_soft_mask) * output_trunk
 
             with tf.variable_scope("last_residual_blocks"):
                 for i in range(self.p):
@@ -194,7 +194,6 @@ class AttentionModule2(AttentionModuleDefault):
                                                                   is_training=is_training)
 
             with tf.variable_scope("skip_connection_1"):
-                # TODO(define new blocks)
                 output_skip_connection_1 = self.residual_block.f_prop(output_soft_mask, input_channels,
                                                                     is_training=is_training)
 

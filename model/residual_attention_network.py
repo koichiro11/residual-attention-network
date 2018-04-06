@@ -25,7 +25,7 @@ class ResidualAttentionNetwork(object):
 
         self.attention_module_1 = AttentionModule2(scope="attention_module_1")
         self.attention_module_2 = AttentionModule2(scope="attention_module_2")
-        self.attention_module_3 = AttentionModule2(scope="attention_module_3")
+        self.attention_module_3 = AttentionModule3(scope="attention_module_3")
         self.residual_block = ResidualBlock()
 
     def f_prop(self, x, is_training=True):
