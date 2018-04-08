@@ -23,7 +23,7 @@ def main():
     """train model"""
     today_date = date.today()
     today_date_str = today_date.strftime('%Y-%m-%d')
-    model_name_default = "model_" + today_date_str +  ".ckpt"
+    model_name_default = "model_" + today_date_str
     # get parameter
     parser = argparse.ArgumentParser()
     parser.add_argument('--lr', type=float, default=hp.LR)
@@ -170,7 +170,7 @@ def main():
 
                 print("save model...")
                 saver = tf.train.Saver()
-                save_path = hp.DATASET_DIR / model_name
+                save_path = hp.DATASET_DIR / model_name + ".ckpt"
                 saver.save(sess, str(save_path))
 
                 print("save result...")
