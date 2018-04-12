@@ -166,7 +166,8 @@ class ResidualBlock(ResidualBlockDefault):
         :return: output residual block
         """
         with tf.variable_scope(scope):
-            shortcut = inputs
+            shortcut = self.conv2d_fixed_padding(inputs=inputs, filters=filters,
+                                                 kernel_size=1, strides=1, data_format=data_format)
             inputs = self.batch_norm(inputs, is_training, data_format)
             inputs = self.conv2d_fixed_padding(
                 inputs=inputs, filters=filters / 4, kernel_size=1, strides=1,
