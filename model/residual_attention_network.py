@@ -41,26 +41,26 @@ class ResidualAttentionNetwork(object):
         # max pooling, x -> [None, row, line, 32]
         x = tf.nn.max_pool(x, ksize=[1, 3, 3, 1], strides=[1, 1, 1, 1], padding='SAME')
 
-        # attention module, x -> [None, row, line, 64]
-        x = self.attention_module_1.f_prop(x, filters=64, is_training=is_training)
+        # attention module, x -> [None, row, line, 32]
+        x = self.attention_module_1.f_prop(x, filters=32, is_training=is_training)
 
-        # residual block, x-> [None, row, line, 256]
-        x = self.residual_block.f_prop(x, filters=128, scope="residual_block_1",
+        # residual block, x-> [None, row, line, 64]
+        x = self.residual_block.f_prop(x, filters=64, scope="residual_block_1",
                                        is_training=is_training)
-        # max pooling, x -> [None, row/2, line/2, 256]
+        # max pooling, x -> [None, row/2, line/2, 64]
         x = tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
-        # attention module, x -> [None, row/2, line/2, 256]
-        x = self.attention_module_2.f_prop(x, filters=128, is_training=is_training)
+        # attention module, x -> [None, row/2, line/2, 64]
+        x = self.attention_module_2.f_prop(x, filters=64, is_training=is_training)
 
-        # residual block, x-> [None, row/2, line/2, 512]
-        x = self.residual_block.f_prop(x, filters=256, scope="residual_block_2",
+        # residual block, x-> [None, row/2, line/2, 128]
+        x = self.residual_block.f_prop(x, filters=128, scope="residual_block_2",
                                        is_training=is_training)
-        # max pooling, x -> [None, row/4, line/4, 256]
+        # max pooling, x -> [None, row/4, line/4, 128]
         x = tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
-        # attention module, x -> [None, row/4, line/4, 256]
-        x = self.attention_module_3.f_prop(x, filters=256, is_training=is_training)
+        # attention module, x -> [None, row/4, line/4, 128]
+        x = self.attention_module_3.f_prop(x, filters=128, is_training=is_training)
 
         # residual block, x-> [None, row/4, line/4, 256]
         x = self.residual_block.f_prop(x, filters=256, scope="residual_block_3",
@@ -73,7 +73,7 @@ class ResidualAttentionNetwork(object):
                                        is_training=is_training)
 
         # residual block, x-> [None, row/4, line/4, 512]
-        x = self.residual_block.f_prop(x, filters=512, scope="residual_block_5",
+        x = self.residual_block.f_prop(x, filters=256, scope="residual_block_5",
                                        is_training=is_training)
 
         # residual block, x-> [None, row/4, line/4, 512]

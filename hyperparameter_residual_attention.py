@@ -10,7 +10,7 @@ class HyperParams:
     # data path
     HOME_DIR = Path(os.environ['HOME']) / 'residual-attention-network'
     DATASET_DIR = HOME_DIR / "dataset"
-    os.makedirs(str(DATASET_DIR), exist_ok=True)
+    DATASET_DIR.mkdir(exist_ok=True)
 
     name = 'cifar-10'
     output_dims = 10
