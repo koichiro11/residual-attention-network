@@ -167,6 +167,7 @@ def main():
                     'EPOCH: {epoch}, Training cost: {train_cost}, Validation cost: {valid_cost}, Validation Accuracy: {accuracy} '
                     .format(epoch=epoch, train_cost=np.mean(_train_costs), valid_cost=np.mean(_valid_costs),
                             accuracy=accuracy))
+                print("learning rate % f" % sess.run(learning_rate))
 
                 print("save model...")
                 saver = tf.train.Saver()
