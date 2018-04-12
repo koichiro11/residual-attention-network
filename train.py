@@ -170,7 +170,7 @@ def main():
 
                 print("save model...")
                 saver = tf.train.Saver()
-                save_path = hp.DATASET_DIR / model_name + ".ckpt"
+                save_path = hp.DATASET_DIR / "{name}.ckpt".format(name=model_name)
                 saver.save(sess, str(save_path))
 
                 print("save result...")
@@ -213,7 +213,7 @@ def main():
 
         print("save model...")
         saver = tf.train.Saver()
-        save_path = hp.DATASET_DIR / model_name
+        save_path = hp.DATASET_DIR / "{name}.ckpt".format(name=model_name)
         saver.save(sess, str(save_path))
 
         print("start to eval...")
