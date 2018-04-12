@@ -45,7 +45,7 @@ class Dense(Layer):
         return self.function(tf.matmul(x, self.W) + self.b)
 
 
-class ResidualBlock(object):
+class ResidualBlockDefault(object):
     """
     residual block proposed by https://arxiv.org/pdf/1603.05027.pdf
     tensorflow version=r1.4
@@ -122,5 +122,63 @@ class ResidualBlock(object):
                                 lambda: (ema.average(batch_mean), ema.average(batch_var)))
             normed = tf.nn.batch_normalization(x, mean, var, beta, gamma, 1e-3)
         return tf.nn.relu(normed)
+
+
+class ResidualBlock(ResidualBlockDefault):
+    """
+    residual block proposed by https://arxiv.org/pdf/1603.05027.pdf
+    tensorflow version=r1.4
+
+    """
+    def __init__(self, kernel_size=3):
+        """
+        :param kernel_size: kernel size of second conv2d
+        """
+        super().__init__(kernel_size)
+        self._BATCH_NORM_DECAY = 0.997
+        self._BATCH_NORM_EPSILON = 1e-5
+
+    def f_prop(self, _input, input_channels, output_channels=None, scope="residual_block", is_training=True):
+        """
+        forward propagation
+        :param _input: A Tensor
+        :param input_channels: dimension of input channel.
+        :param output_channels: dimension of output channel. input_channel -> output_channel
+        :param stride: int stride of kernel
+        :param scope: str, tensorflow name scope
+        :param is_training: boolean, whether training step or not(test step)
+        :return: output residual block
+        """
+        if output_channels is None:
+            output_channels = input_channels
+
+        with tf.variable_scope(scope):
+            # batch normalization & ReLU TODO(this function should be updated when the TF version changes)
+            x = self.batch_norm(_input, is_training)
+
+            x = tf.layers.conv2d(x, filters=output_channels, kernel_size=1, padding='SAME', name="conv1")
+
+            # batch normalization & ReLU TODO(this function should be updated when the TF version changes)
+            x = self.batch_norm(x, is_training)
+
+            x = tf.layers.conv2d(x, filters=output_channels, kernel_size=self.kernel_size,
+                                 strides=1, padding='SAME', name="conv2")
+
+            # update input
+            if input_channels != output_channels:
+                _input = tf.layers.conv2d(_input, filters=output_channels, kernel_size=1, strides=1)
+
+            output = x + _input
+
+            return output
+
+    def batch_norm(self, inputs, is_training, data_format='channels_last',):
+        """Performs a batch normalization using a standard set of parameters."""
+        # We set fused=True for a significant performance boost. See
+        # https://www.tensorflow.org/performance/performance_guide#common_fused_ops
+        return tf.layers.batch_normalization(
+            inputs=inputs, axis=1 if data_format == 'channels_first' else 3,
+            momentum=self._BATCH_NORM_DECAY, epsilon=self._BATCH_NORM_EPSILON, center=True,
+            scale=True, training=is_training, fused=True)
 
 
