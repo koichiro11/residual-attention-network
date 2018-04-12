@@ -36,48 +36,48 @@ class ResidualAttentionNetwork(object):
         # x = [None, row, line, channel]
 
         # conv, x -> [None, row, line, 32]
-        x = tf.layers.conv2d(x, filters=32, kernel_size=3, strides=1, padding='SAME')
+        x = tf.layers.conv2d(x, filters=32, kernel_size=5, strides=1, padding='SAME')
 
         # max pooling, x -> [None, row, line, 32]
         x = tf.nn.max_pool(x, ksize=[1, 3, 3, 1], strides=[1, 1, 1, 1], padding='SAME')
 
-        # attention module, x -> [None, row, line, 32]
-        x = self.attention_module_1.f_prop(x, input_channels=32, is_training=is_training)
+        # attention module, x -> [None, row, line, 128]
+        x = self.attention_module_1.f_prop(x, filters=128, is_training=is_training)
 
-        # residual block, x-> [None, row, line, 64]
-        x = self.residual_block.f_prop(x, input_channels=32, output_channels=64, scope="residual_block_1",
+        # residual block, x-> [None, row, line, 256]
+        x = self.residual_block.f_prop(x, filters=256, scope="residual_block_1",
                                        is_training=is_training)
-        # max pooling, x -> [None, row/2, line/2, 64]
+        # max pooling, x -> [None, row/2, line/2, 256]
         x = tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
-        # attention module, x -> [None, row/2, line/2, 64]
-        x = self.attention_module_2.f_prop(x, input_channels=64, is_training=is_training)
+        # attention module, x -> [None, row/2, line/2, 256]
+        x = self.attention_module_2.f_prop(x, filters=256, is_training=is_training)
 
-        # residual block, x-> [None, row/2, line/2, 128]
-        x = self.residual_block.f_prop(x, input_channels=64, output_channels=128, scope="residual_block_2",
+        # residual block, x-> [None, row/2, line/2, 512]
+        x = self.residual_block.f_prop(x, filters=512, scope="residual_block_2",
                                        is_training=is_training)
-        # max pooling, x -> [None, row/4, line/4, 128]
+        # max pooling, x -> [None, row/4, line/4, 512]
         x = tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
 
-        # attention module, x -> [None, row/4, line/4, 64]
-        x = self.attention_module_3.f_prop(x, input_channels=128, is_training=is_training)
+        # attention module, x -> [None, row/4, line/4, 512]
+        x = self.attention_module_3.f_prop(x, input_channels=512, is_training=is_training)
 
-        # residual block, x-> [None, row/4, line/4, 256]
-        x = self.residual_block.f_prop(x, input_channels=128, output_channels=256, scope="residual_block_3",
+        # residual block, x-> [None, row/4, line/4, 512]
+        x = self.residual_block.f_prop(x, filters=512, scope="residual_block_3",
                                        is_training=is_training)
-        # max pooling, x -> [None, row/4, line/4, 256]
+        # max pooling, x -> [None, row/4, line/4, 512]
         # x = tf.nn.max_pool(x, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding='SAME')
 
-        # residual block, x-> [None, row/4, line/4, 256]
-        x = self.residual_block.f_prop(x, input_channels=256, output_channels=256, scope="residual_block_4",
+        # residual block, x-> [None, row/4, line/4, 512]
+        x = self.residual_block.f_prop(x, filters=512, scope="residual_block_4",
                                        is_training=is_training)
 
-        # residual block, x-> [None, row/4, line/4, 256]
-        x = self.residual_block.f_prop(x, input_channels=256, output_channels=256, scope="residual_block_5",
+        # residual block, x-> [None, row/4, line/4, 1024]
+        x = self.residual_block.f_prop(x, filters=1024, scope="residual_block_5",
                                        is_training=is_training)
 
-        # residual block, x-> [None, row/4, line/4, 256]
-        x = self.residual_block.f_prop(x, input_channels=256, output_channels=256, scope="residual_block_6",
+        # residual block, x-> [None, row/4, line/4, 1024]
+        x = self.residual_block.f_prop(x, filters=1024, scope="residual_block_6",
                                        is_training=is_training)
 
         # average pooling

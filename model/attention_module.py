@@ -29,7 +29,7 @@ class AttentionModule52(object):
         """
         soft mask branch.
         :param inputs: A Tensor. inputs data [batch_size, height, width, channel]
-        :param filters: dimension of inputs channel.
+        :param filters: dimension of output channels
         :param is_training: boolean, whether training step or not(test step)
         :return: A Tensor [batch_size, height, width, channel]
         """
@@ -39,7 +39,7 @@ class AttentionModule52(object):
         """
         f_prop function of attention module
         :param inputs: A Tensor. inputs data [batch_size, height, width, channel]
-        :param filters: dimension of filters for cnn.
+        :param filters: dimension of output channels
         :param is_training: boolean, whether training step or not(test step)
         :return: A Tensor [batch_size, height, width, channel]
         """
@@ -78,7 +78,7 @@ class AttentionModule52_1(AttentionModule52):
         """
         soft mask branch.
         :param inputs: A Tensor. inputs data [batch_size, height, width, channel]
-        :param filters: dimension of filters for cnn.
+        :param filters: dimension of output channels
         :param is_training: boolean, whether training step or not(test step)
         :return: A Tensor [batch_size, height, width, channel]
         """
@@ -177,7 +177,7 @@ class AttentionModule52_2(AttentionModule52):
         """
         soft mask branch.
         :param inputs: A Tensor. inputs data [batch_size, height, width, channel]
-        :param filters: dimension of filters for cnn.
+        :param filters: dimension of output channels
         :param is_training: boolean, whether training step or not(test step)
         :return: A Tensor [batch_size, height, width, channel]
         """
@@ -247,7 +247,7 @@ class AttentionModule52_3(AttentionModule52):
         """
         soft mask branch.
         :param inputs: A Tensor. inputs data [batch_size, height, width, channel]
-        :param filters: dimension of filters for cnn.
+        :param filters: dimension of output channels
         :param is_training: boolean, whether training step or not(test step)
         :return: A Tensor [batch_size, height, width, channel]
         """
@@ -290,7 +290,7 @@ class AttentionModule52_4(AttentionModule52):
         """
         soft mask branch.
         :param inputs: A Tensor. inputs data [batch_size, height, width, channel]
-        :param filters: dimension of filters for cnn.
+        :param filters: dimension of output channels
         :param is_training: boolean, whether training step or not(test step)
         :return: A Tensor [batch_size, height, width, channel]
         """
