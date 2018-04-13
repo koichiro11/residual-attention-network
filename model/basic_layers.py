@@ -190,7 +190,7 @@ class ResidualBlockBottleNeck(ResidualBlockDefault):
             return inputs
 
 
-class ResidualBlockWide(ResidualBlockDefault):
+class ResidualBlock(ResidualBlockDefault):
     """
     residual block proposed by https://arxiv.org/pdf/1603.05027.pdf
     tensorflow version=r1.4
@@ -203,13 +203,14 @@ class ResidualBlockWide(ResidualBlockDefault):
         super().__init__(kernel_size)
         self.widen = widen
 
-    def f_prop(self, inputs, filters, strides=1, scope="residual_block", is_training=True, data_format='channels_last'):
+    def f_prop(self, inputs, filters, is_resize=False, strides=1, scope="residual_block", is_training=True, data_format='channels_last'):
         """
         forward propagation
         widenet
         https://arxiv.org/pdf/1605.07146.pdf
         :param inputs: A Tensor
         :param filters: dimension of output channel
+        :param is_resize: necessity to resize channel
         :param strides: int stride of kernel
         :param scope: str, tensorflow name scope
         :param is_training: boolean, whether training step or not(test step)
@@ -217,14 +218,17 @@ class ResidualBlockWide(ResidualBlockDefault):
         :return: output residual block
         """
         with tf.variable_scope(scope):
-            shortcut = self.conv2d_fixed_padding(inputs=inputs, filters=filters * self.widen,
-                                                 kernel_size=1, strides=1, data_format=data_format)
+            if is_resize:
+                shortcut = self.conv2d_fixed_padding(inputs=inputs, filters=filters,
+                                                     kernel_size=1, strides=1, data_format=data_format)
+            else:
+                shortcut = inputs
 
             # cnn3*3
             inputs = self.batch_norm(inputs, is_training, data_format)
             inputs = tf.nn.relu(inputs)
             inputs = self.conv2d_fixed_padding(
-                inputs=inputs, filters=filters * self.widen, kernel_size=3, strides=1,
+                inputs=inputs, filters=filters, kernel_size=3, strides=1,
                 data_format=data_format)
 
             # dropout
@@ -234,7 +238,7 @@ class ResidualBlockWide(ResidualBlockDefault):
             inputs = self.batch_norm(inputs, is_training, data_format)
             inputs = tf.nn.relu(inputs)
             inputs = self.conv2d_fixed_padding(
-                inputs=inputs, filters=filters * self.widen, kernel_size=3, strides=1,
+                inputs=inputs, filters=filters, kernel_size=3, strides=1,
                 data_format=data_format)
 
             inputs += shortcut

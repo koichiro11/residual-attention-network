@@ -13,7 +13,7 @@ from sklearn.metrics import f1_score, accuracy_score
 import tensorflow as tf
 
 from model.utils import EarlyStopping, loss_filter
-from model.residual_attention_network import ResidualAttentionNetwork
+from model.residual_attention_networks import ResidualAttentionNetwork
 from preprocessor import PreProcessorWithAugmentation as Preprocess
 from hyperparameter_residual_attention import HyperParams as hp
 
