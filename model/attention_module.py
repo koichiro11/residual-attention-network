@@ -6,7 +6,7 @@ import abc
 import tensorflow as tf
 from keras.layers.convolutional import UpSampling2D
 
-from .basic_layers import ResidualBlock
+from .basic_layers import ResidualBlockBottleNeck, ResidualBlockWide
 
 
 class AttentionModule52(object):
@@ -22,7 +22,7 @@ class AttentionModule52(object):
         self.r = r
         self.scope = scope
 
-        self.residual_block = ResidualBlock()
+        self.residual_block = ResidualBlockBottleNeck()
 
     @abc.abstractmethod
     def soft_mask_branch(self, inputs, filters, is_training=True):

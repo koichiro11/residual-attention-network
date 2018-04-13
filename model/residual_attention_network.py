@@ -6,7 +6,7 @@ Residual Attention Network
 import tensorflow as tf
 import numpy as np
 
-from .basic_layers import ResidualBlock
+from .basic_layers import ResidualBlockBottleNeck, ResidualBlockWide
 from .attention_module import AttentionModule52_1, AttentionModule52_2, AttentionModule52_3, AttentionModule52_4
 
 
@@ -25,7 +25,7 @@ class ResidualAttentionNetwork(object):
         # self.attention_module_1 = AttentionModule52_1(scope="attention_module_1")
         self.attention_module_2 = AttentionModule52_3(scope="attention_module_2")
         self.attention_module_3 = AttentionModule52_4(scope="attention_module_3")
-        self.residual_block = ResidualBlock()
+        self.residual_block = ResidualBlockBottleNeck()
 
     def f_prop(self, x, is_training=True):
         """
@@ -36,40 +36,40 @@ class ResidualAttentionNetwork(object):
         # x = [None, row, line, channel]
 
         # conv, x -> [None, row, line, 32]
-        x = tf.layers.conv2d(x, filters=32, kernel_size=5, strides=1, padding='SAME')
+        x = tf.layers.conv2d(x, filters=16, kernel_size=3, strides=1, padding='SAME')
 
         # max pooling, x -> [None, row, line, 32]
         x = tf.nn.max_pool(x, ksize=[1, 3, 3, 1], strides=[1, 1, 1, 1], padding='SAME')
 
-        # attention module, x -> [None, row, line, 32]
-        x = self.attention_module_1.f_prop(x, filters=32, is_training=is_training)
+        # attention module, x -> [None, row, line, 16: when using widenet, filters=16*widen]
+        x = self.attention_module_1.f_prop(x, filters=16, is_training=is_training)
 
-        # residual block, x-> [None, row, line, 64]
-        x = self.residual_block.f_prop(x, filters=64, scope="residual_block_1",
+        # residual block, x-> [None, row, line, 16: when using widenet, filters=16*widen]
+        x = self.residual_block.f_prop(x, filters=32, scope="residual_block_1",
                                        is_training=is_training)
-        # max pooling, x -> [None, row/2, line/2, 64]
-        x = tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+        # max pooling, x -> [None, row/2, line/2, 16]
+        x = tf.nn.max_pool(x, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding='SAME')
 
-        # attention module, x -> [None, row/2, line/2, 64]
-        x = self.attention_module_2.f_prop(x, filters=64, is_training=is_training)
+        # attention module, x -> [None, row/2, line/2, 32: when using widenet, filters=32*widen]
+        x = self.attention_module_2.f_prop(x, filters=32, is_training=is_training)
 
-        # residual block, x-> [None, row/2, line/2, 128]
-        x = self.residual_block.f_prop(x, filters=128, scope="residual_block_2",
+        # residual block, x-> [None, row/2, line/2, when using widenet, filters=32*widen]
+        x = self.residual_block.f_prop(x, filters=64, scope="residual_block_2",
                                        is_training=is_training)
         # max pooling, x -> [None, row/4, line/4, 128]
-        x = tf.nn.max_pool(x, ksize=[1, 2, 2, 1], strides=[1, 2, 2, 1], padding='SAME')
+        x = tf.nn.max_pool(x, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding='SAME')
 
         # attention module, x -> [None, row/4, line/4, 128]
-        x = self.attention_module_3.f_prop(x, filters=128, is_training=is_training)
+        x = self.attention_module_3.f_prop(x, filters=64, is_training=is_training)
 
         # residual block, x-> [None, row/4, line/4, 256]
-        x = self.residual_block.f_prop(x, filters=256, scope="residual_block_3",
+        x = self.residual_block.f_prop(x, filters=128, scope="residual_block_3",
                                        is_training=is_training)
         # max pooling, x -> [None, row/4, line/4, 512]
         # x = tf.nn.max_pool(x, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding='SAME')
 
         # residual block, x-> [None, row/4, line/4, 512]
-        x = self.residual_block.f_prop(x, filters=256, scope="residual_block_4",
+        x = self.residual_block.f_prop(x, filters=192, scope="residual_block_4",
                                        is_training=is_training)
 
         # residual block, x-> [None, row/4, line/4, 512]

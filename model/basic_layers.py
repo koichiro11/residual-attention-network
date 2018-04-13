@@ -56,6 +56,8 @@ class ResidualBlockDefault(object):
         :param kernel_size: kernel size of second conv2d
         """
         self.kernel_size = kernel_size
+        self._BATCH_NORM_DECAY = 0.997
+        self._BATCH_NORM_EPSILON = 1e-5
 
     def f_prop(self, _input, input_channels, output_channels=None, scope="residual_block", is_training=True):
         """
@@ -138,7 +140,7 @@ class ResidualBlockDefault(object):
         return padded_inputs
 
 
-class ResidualBlock(ResidualBlockDefault):
+class ResidualBlockBottleNeck(ResidualBlockDefault):
     """
     residual block proposed by https://arxiv.org/pdf/1603.05027.pdf
     tensorflow version=r1.4
@@ -149,8 +151,6 @@ class ResidualBlock(ResidualBlockDefault):
         :param kernel_size: kernel size of second conv2d
         """
         super().__init__(kernel_size)
-        self._BATCH_NORM_DECAY = 0.997
-        self._BATCH_NORM_EPSILON = 1e-5
 
     def f_prop(self, inputs, filters, strides=1, scope="residual_block", is_training=True, data_format='channels_last'):
         """
@@ -185,6 +185,58 @@ class ResidualBlock(ResidualBlockDefault):
                 inputs=inputs, filters=filters, kernel_size=1, strides=1,
                 data_format=data_format)
             inputs = self.batch_norm(inputs, is_training, data_format)
+            inputs += shortcut
+
+            return inputs
+
+
+class ResidualBlockWide(ResidualBlockDefault):
+    """
+    residual block proposed by https://arxiv.org/pdf/1603.05027.pdf
+    tensorflow version=r1.4
+
+    """
+    def __init__(self, kernel_size=3, widen=4):
+        """
+        :param kernel_size: kernel size of second conv2d
+        """
+        super().__init__(kernel_size)
+        self.widen = widen
+
+    def f_prop(self, inputs, filters, strides=1, scope="residual_block", is_training=True, data_format='channels_last'):
+        """
+        forward propagation
+        widenet
+        https://arxiv.org/pdf/1605.07146.pdf
+        :param inputs: A Tensor
+        :param filters: dimension of output channel
+        :param strides: int stride of kernel
+        :param scope: str, tensorflow name scope
+        :param is_training: boolean, whether training step or not(test step)
+        :param data_format: The input format ('channels_last' or 'channels_first').
+        :return: output residual block
+        """
+        with tf.variable_scope(scope):
+            shortcut = self.conv2d_fixed_padding(inputs=inputs, filters=filters * self.widen,
+                                                 kernel_size=1, strides=1, data_format=data_format)
+
+            # cnn3*3
+            inputs = self.batch_norm(inputs, is_training, data_format)
+            inputs = tf.nn.relu(inputs)
+            inputs = self.conv2d_fixed_padding(
+                inputs=inputs, filters=filters * self.widen, kernel_size=3, strides=1,
+                data_format=data_format)
+
+            # dropout
+            inputs = tf.layers.dropout(inputs=inputs, rate=0.4, training=is_training)
+
+            # cnn3*3
+            inputs = self.batch_norm(inputs, is_training, data_format)
+            inputs = tf.nn.relu(inputs)
+            inputs = self.conv2d_fixed_padding(
+                inputs=inputs, filters=filters * self.widen, kernel_size=3, strides=1,
+                data_format=data_format)
+
             inputs += shortcut
 
             return inputs
