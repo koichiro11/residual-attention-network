@@ -22,7 +22,7 @@ class WideResidualNetworks(object):
 
         # for cifar-10, you should use attention module 2 for first stage
         self.N = 3
-        self.k = 8
+        self.k = 1
         self.residual_block = ResidualBlock()
 
     def f_prop(self, x, is_training=True):
