@@ -22,7 +22,7 @@ class WideResidualNetworks(object):
 
         # for cifar-10, you should use attention module 2 for first stage
         self.N = 3
-        self.k = 1
+        self.k = 8
         self.residual_block = ResidualBlock()
 
     def f_prop(self, x, is_training=True):
@@ -73,7 +73,7 @@ class WideResidualNetworks(object):
         x = tf.reshape(x, (-1, np.prod(x.get_shape().as_list()[1:])))
 
         # layer normalization
-        # x = tf.contrib.layers.layer_norm(x, begin_norm_axis=-1)
+        x = tf.contrib.layers.layer_norm(x, begin_norm_axis=-1)
         # FC, softmax
         y = tf.layers.dense(x, self.output_dim, activation=tf.nn.softmax)
 
