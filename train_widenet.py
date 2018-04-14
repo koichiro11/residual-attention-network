@@ -149,7 +149,7 @@ def main():
             _valid_costs = []
             valid_predictions = []
             valid_label = []
-            n_batches = info["data_size"]["valid"] // hp.VALID_BATCH_SIZE
+            n_batches = info["data_size"]["test"] // hp.VALID_BATCH_SIZE
             for i in range(n_batches):
                 valid_X_mb, valid_y_mb = sess.run(valid_batch)
                 pred, _valid_cost = sess.run([valid, cross_entropy],
