@@ -54,7 +54,7 @@ def main():
     test_path = str(hp.SAVE_DIR / 'test*.tfrecord')
     image_size = info['image_size']
     train_dataset = preprocess.load_tfrecords_dataset(train_path, image_size, 10)
-    valid_dataset = preprocess.load_tfrecords_dataset(valid_path, image_size, 10)
+    valid_dataset = preprocess.load_tfrecords_dataset(test_path, image_size, 10)
     test_dataset = preprocess.load_tfrecords_dataset(test_path, image_size, 10)
 
     # get iterator
@@ -110,9 +110,6 @@ def main():
     learning_rate = tf.train.exponential_decay(starter_learning_rate, global_step,
                                                48000, 0.1, staircase=True)
 
-    #learning_rate = tf.train.exponential_decay(_learning_rate, global_step,
-    #                                    96000, 0.1, staircase=True)
-
     train = tf.train.MomentumOptimizer(learning_rate, 0.8).minimize(loss, global_step=global_step)
 
     #train = tf.train.AdamOptimizer(learning_rate).minimize(tf.reduce_mean(loss), global_step=global_step)
@@ -123,6 +120,7 @@ def main():
         print("start to train...")
         train_costs = []
         valid_costs = []
+        accuracy_scores = []
         elapsed_times = []
         if is_restore:
             save_path = hp.DATASET_DIR / '{model}.ckpt'.format(model=model_name)
@@ -162,6 +160,7 @@ def main():
 
             # f1_score = f1_score(np.argmax(valid_y, 1).astype('int32'), valid_predictions, average='macro')
             accuracy = accuracy_score(valid_label, valid_predictions)
+            accuracy_scores.append(accuracy)
             if epoch % 5 == 0:
                 print(
                     'EPOCH: {epoch}, Training cost: {train_cost}, Validation cost: {valid_cost}, Validation Accuracy: {accuracy} '
@@ -205,7 +204,7 @@ def main():
                 # training costs
                 accuracy_path = hp.SAVE_DIR / "accuracy_{name}.pkl".format(name=model_name)
                 with open(accuracy_path, mode='wb') as f:
-                    pickle.dump(test_accuracy, f)
+                    pickle.dump(accuracy_scores, f)
 
             train_costs.append(np.mean(_train_costs))
             valid_costs.append(np.mean(_valid_costs))
@@ -249,7 +248,7 @@ def main():
     # training costs
     accuracy_path = hp.SAVE_DIR / "accuracy_{name}.pkl".format(name=model_name)
     with open(accuracy_path, mode='wb') as f:
-        pickle.dump(test_accuracy, f)
+        pickle.dump(accuracy_scores, f)
 
 
 if __name__ == "__main__":

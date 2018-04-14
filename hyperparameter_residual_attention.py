@@ -26,5 +26,5 @@ class HyperParams:
     WEIGHT_DECAY = 5e-4
     RANDOM_STATE = 1234
     NUM_EPOCHS = 200
-    BATCH_SIZE = 64
+    BATCH_SIZE = 128
     VALID_BATCH_SIZE = 100
