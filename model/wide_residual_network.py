@@ -43,37 +43,44 @@ class WideResidualNetworks(object):
         # conv2
         with tf.variable_scope("conv_2"):
             for i in range(self.N):
-                x = self.residual_block.f_prop(x, 16 * self.k, is_resize=(True if i == 0 else False),
-                                           scope="num_blocks_{}".format(i),
-                                           is_training=is_training)
+                x = self.residual_block.f_prop(x,
+                                               16 * self.k,
+                                               is_resize=(True if i == 0 else False),
+                                               scope="num_blocks_{}".format(i),
+                                               is_training=is_training)
 
 
         # conv3
         with tf.variable_scope("conv_3"):
             for i in range(self.N):
-                x = self.residual_block.f_prop(x, 32 * self.k, is_resize=(True if i == 0 else False),
+                x = self.residual_block.f_prop(x,
+                                               32 * self.k,
+                                               is_resize=(True if i == 0 else False),
+                                               strides=(2 if i==self.N-1 else 1),
                                                scope="num_blocks_{}".format(i),
                                                is_training=is_training)
 
-            # max pooling, x -> [None, row/2, line/2, 32 * self.k]
-            x = tf.nn.max_pool(x, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding='SAME')
 
         # conv4
         with tf.variable_scope("conv_4"):
             for i in range(self.N):
-                x = self.residual_block.f_prop(x, 64 * self.k, is_resize=(True if i == 0 else False),
+                x = self.residual_block.f_prop(x,
+                                               32 * self.k,
+                                               is_resize=(True if i == 0 else False),
+                                               strides=(2 if i == self.N - 1 else 1),
                                                scope="num_blocks_{}".format(i),
                                                is_training=is_training)
 
-            # max pooling, x -> [None, row/2, line/2, 32 * self.k]
-            x = tf.nn.max_pool(x, ksize=[1, 3, 3, 1], strides=[1, 2, 2, 1], padding='SAME')
+        # pre norm
+        x = self.residual_block.batch_norm(x, is_training)
+        x = tf.nn.relu(x)
 
         # average pooling
         x = tf.nn.avg_pool(x, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='VALID')
         x = tf.reshape(x, (-1, np.prod(x.get_shape().as_list()[1:])))
 
         # layer normalization
-        x = tf.contrib.layers.layer_norm(x, begin_norm_axis=-1)
+        #x = tf.contrib.layers.layer_norm(x, begin_norm_axis=-1)
         # FC, softmax
         y = tf.layers.dense(x, self.output_dim, activation=tf.nn.softmax)
 

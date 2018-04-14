@@ -220,7 +220,7 @@ class ResidualBlock(ResidualBlockDefault):
         with tf.variable_scope(scope):
             if is_resize:
                 shortcut = self.conv2d_fixed_padding(inputs=inputs, filters=filters,
-                                                     kernel_size=1, strides=1, data_format=data_format)
+                                                     kernel_size=1, strides=strides, data_format=data_format)
             else:
                 shortcut = inputs
 
@@ -228,15 +228,15 @@ class ResidualBlock(ResidualBlockDefault):
             inputs = self.batch_norm(inputs, is_training, data_format)
             inputs = tf.nn.relu(inputs)
             inputs = self.conv2d_fixed_padding(
-                inputs=inputs, filters=filters, kernel_size=3, strides=1,
+                inputs=inputs, filters=filters, kernel_size=3, strides=strides,
                 data_format=data_format)
 
-            # dropout
-            inputs = tf.layers.dropout(inputs=inputs, rate=0.4, training=is_training)
 
             # cnn3*3
             inputs = self.batch_norm(inputs, is_training, data_format)
             inputs = tf.nn.relu(inputs)
+            # dropout
+            inputs = tf.layers.dropout(inputs=inputs, rate=0.4, training=is_training)
             inputs = self.conv2d_fixed_padding(
                 inputs=inputs, filters=filters, kernel_size=3, strides=1,
                 data_format=data_format)

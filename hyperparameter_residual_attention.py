@@ -22,8 +22,8 @@ class HyperParams:
     target_dataset = "CIFAR-10"
 
     # setting
-    LR = 1e-3
-    WEIGHT_DECAY = 0.0001
+    LR = 1e-1
+    WEIGHT_DECAY = 5e-4
     RANDOM_STATE = 1234
     NUM_EPOCHS = 200
     BATCH_SIZE = 64

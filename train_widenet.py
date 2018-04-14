@@ -108,14 +108,14 @@ def main():
     global_step = tf.Variable(0, trainable=False)
 
     learning_rate = tf.train.exponential_decay(starter_learning_rate, global_step,
-                                               64000, 0.1, staircase=True)
+                                               48000, 0.1, staircase=True)
 
     #learning_rate = tf.train.exponential_decay(_learning_rate, global_step,
     #                                    96000, 0.1, staircase=True)
 
-    #train = tf.train.MomentumOptimizer(learning_rate, 0.9).minimize(loss, global_step=global_step)
+    train = tf.train.MomentumOptimizer(learning_rate, 0.8).minimize(loss, global_step=global_step)
 
-    train = tf.train.AdamOptimizer(learning_rate).minimize(tf.reduce_mean(loss), global_step=global_step)
+    #train = tf.train.AdamOptimizer(learning_rate).minimize(tf.reduce_mean(loss), global_step=global_step)
     valid = tf.argmax(y, 1)
     saver = tf.train.Saver()
 
