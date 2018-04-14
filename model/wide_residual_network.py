@@ -55,7 +55,7 @@ class WideResidualNetworks(object):
             for i in range(self.N):
                 x = self.residual_block.f_prop(x,
                                                32 * self.k,
-                                               is_resize=(True if i == 0 else False),
+                                               is_resize=(True if (i == 0 or i == self.N-1)else False),
                                                strides=(2 if i==self.N-1 else 1),
                                                scope="num_blocks_{}".format(i),
                                                is_training=is_training)
@@ -66,7 +66,7 @@ class WideResidualNetworks(object):
             for i in range(self.N):
                 x = self.residual_block.f_prop(x,
                                                32 * self.k,
-                                               is_resize=(True if i == 0 else False),
+                                               is_resize=(True if (i == 0 or i == self.N-1) else False),
                                                strides=(2 if i == self.N - 1 else 1),
                                                scope="num_blocks_{}".format(i),
                                                is_training=is_training)
