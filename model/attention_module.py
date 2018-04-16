@@ -6,7 +6,7 @@ import abc
 import tensorflow as tf
 from keras.layers.convolutional import UpSampling2D
 
-from .basic_layers import ResidualBlockBottleNeck, ResidualBlockWide
+from .basic_layers import ResidualBlockBottleNeck, ResidualBlock
 
 
 class AttentionModule52(object):
