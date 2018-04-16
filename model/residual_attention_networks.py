@@ -6,7 +6,7 @@ Residual Attention Network
 import tensorflow as tf
 import numpy as np
 
-from .basic_layers import ResidualBlockBottleNeck, ResidualBlockWide
+from .basic_layers import ResidualBlockBottleNeck, ResidualBlock
 from .attention_module import AttentionModule52_1, AttentionModule52_2, AttentionModule52_3, AttentionModule52_4
 
 
