@@ -54,7 +54,7 @@ def main():
     test_path = str(hp.SAVE_DIR / 'test*.tfrecord')
     image_size = info['image_size']
     train_dataset = preprocess.load_tfrecords_dataset(train_path, image_size, 10)
-    valid_dataset = preprocess.load_tfrecords_dataset(valid_path, image_size, 10)
+    valid_dataset = preprocess.load_tfrecords_dataset(test_path, image_size, 10)
     test_dataset = preprocess.load_tfrecords_dataset(test_path, image_size, 10)
 
     # get iterator
@@ -151,7 +151,7 @@ def main():
             _valid_costs = []
             valid_predictions = []
             valid_label = []
-            n_batches = info["data_size"]["valid"] // hp.VALID_BATCH_SIZE
+            n_batches = info["data_size"]["test"] // hp.VALID_BATCH_SIZE
             for i in range(n_batches):
                 valid_X_mb, valid_y_mb = sess.run(valid_batch)
                 pred, _valid_cost = sess.run([valid, cross_entropy],
