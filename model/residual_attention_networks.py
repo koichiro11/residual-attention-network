@@ -80,12 +80,14 @@ class ResidualAttentionNetwork(object):
         x = self.residual_block.f_prop(x, filters=512, scope="residual_block_6",
                                        is_training=is_training)
 
+        # pre norm
+        x = self.residual_block.batch_norm(x, is_training)
+        x = tf.nn.relu(x)
+
         # average pooling
         x = tf.nn.avg_pool(x, ksize=[1, 8, 8, 1], strides=[1, 1, 1, 1], padding='VALID')
         x = tf.reshape(x, (-1, np.prod(x.get_shape().as_list()[1:])))
 
-        # layer normalization
-        x = tf.contrib.layers.layer_norm(x, begin_norm_axis=-1)
         # FC, softmax
         y = tf.layers.dense(x, self.output_dim, activation=tf.nn.softmax)
 
